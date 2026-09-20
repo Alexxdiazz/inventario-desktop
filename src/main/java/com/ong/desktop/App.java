@@ -96,6 +96,8 @@ public class App extends Application {
                 "Historial", stage, "historial");
         agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
                 "Reservas", stage, "reservas");
+        agregarBotonSi(rol, new String[]{"ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA"}, 
+                "Reportes", stage, "reportes");
 
         root.setLeft(menuLateral);
 
@@ -179,6 +181,7 @@ public class App extends Application {
                 return new PanelHistorial(stage, rol).construir();
             case "reservas":
                 return new PanelReservas(stage, rol).construir();
+            case "reportes":    return new PanelReportes(stage).construir();
             default:
                 throw new IllegalArgumentException("Tipo desconocido: " + tipo);
         }

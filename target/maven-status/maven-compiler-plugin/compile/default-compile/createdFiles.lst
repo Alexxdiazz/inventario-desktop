@@ -57,3 +57,4 @@ com\ong\desktop\vistas\FormularioDonacion.class
 com\ong\desktop\vistas\FormularioHistorial.class
 com\ong\desktop\servicios\ApiServicio$1.class
 com\ong\desktop\vistas\PanelCategorias.class
+com\ong\desktop\vistas\PanelReportes.class
