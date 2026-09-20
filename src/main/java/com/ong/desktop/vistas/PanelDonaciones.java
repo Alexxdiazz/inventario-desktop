@@ -22,9 +22,11 @@ public class PanelDonaciones {
     private final ApiServicio api = new ApiServicio();
     private final TableView<DonacionRecepcion> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelDonaciones(Stage owner) {
+    public PanelDonaciones(Stage owner,  String rol) {
         this.owner = owner;
+        this.rol = rol;
     }
 
     public VBox construir() {
@@ -55,14 +57,19 @@ public class PanelDonaciones {
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
             DonacionRecepcion sel = tabla.getSelectionModel().getSelectedItem();
-            if (sel == null) { mostrarAlerta("Selecciona una donación primero"); return; }
+            if (sel == null) { mostrarAlerta("Selecciona una donaciÃ³n primero"); return; }
             abrirFormulario(sel);
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-      HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+      HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -100,9 +107,9 @@ public class PanelDonaciones {
 
     private void eliminarSeleccionado() {
         DonacionRecepcion sel = tabla.getSelectionModel().getSelectedItem();
-        if (sel == null) { mostrarAlerta("Selecciona una donación primero"); return; }
+        if (sel == null) { mostrarAlerta("Selecciona una donaciÃ³n primero"); return; }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("¿Eliminar esta donación?");
+        confirmacion.setHeaderText("Â¿Eliminar esta donaciÃ³n?");
         confirmacion.setContentText("ID: " + sel.getIdDonacion());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {

@@ -23,9 +23,12 @@ public class PanelPrestamos {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Prestamo> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelPrestamos(Stage owner) {
+    public PanelPrestamos(Stage owner,String rol) {
         this.owner = owner;
+        this.rol = rol;
+
     }
 
     public VBox construir() {
@@ -37,7 +40,7 @@ public class PanelPrestamos {
         colReceptor.setCellValueFactory(new PropertyValueFactory<>("receptor"));
         colReceptor.setPrefWidth(180);
 
-        TableColumn<Prestamo, Object> colArticulo = new TableColumn<>("Artículo");
+        TableColumn<Prestamo, Object> colArticulo = new TableColumn<>("ArtÃ­culo");
         colArticulo.setCellValueFactory(new PropertyValueFactory<>("articulo"));
         colArticulo.setPrefWidth(200);
 
@@ -63,7 +66,7 @@ public class PanelPrestamos {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
-        Button btnDevolver = new Button("Registrar Devolución");
+        Button btnDevolver = new Button("Registrar DevoluciÃ³n");
         btnDevolver.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-cursor: hand;");
         Button btnExportar = new Button("Exportar");
 
@@ -71,7 +74,7 @@ public class PanelPrestamos {
         btnEditar.setOnAction(e -> {
             Prestamo sel = tabla.getSelectionModel().getSelectedItem();
             if (sel == null) {
-                mostrarAlerta("Selecciona un préstamo primero");
+                mostrarAlerta("Selecciona un prÃ©stamo primero");
                 return;
             }
             abrirFormulario(sel);
@@ -81,7 +84,12 @@ public class PanelPrestamos {
         btnExportar.setOnAction(e -> exportar());
         btnDevolver.setOnAction(e -> registrarDevolucion());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnDevolver, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnDevolver, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -120,11 +128,11 @@ public class PanelPrestamos {
     private void eliminarSeleccionado() {
         Prestamo sel = tabla.getSelectionModel().getSelectedItem();
         if (sel == null) {
-            mostrarAlerta("Selecciona un préstamo primero");
+            mostrarAlerta("Selecciona un prÃ©stamo primero");
             return;
         }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("¿Eliminar este préstamo?");
+        confirmacion.setHeaderText("Â¿Eliminar este prÃ©stamo?");
         confirmacion.setContentText("ID: " + sel.getIdPrestamo());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {
@@ -146,7 +154,7 @@ public class PanelPrestamos {
 
     private void exportar() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Guardar reporte de préstamos");
+        fc.setTitle("Guardar reporte de prÃ©stamos");
         fc.setInitialFileName("prestamos");
         fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
@@ -155,7 +163,7 @@ public class PanelPrestamos {
         if (archivo == null)
             return;
         try {
-            String[] encabezados = { "ID", "Receptor", "Artículo", "Cantidad", "Responsable", "Fecha prevista" };
+            String[] encabezados = { "ID", "Receptor", "ArtÃ­culo", "Cantidad", "Responsable", "Fecha prevista" };
             List<String[]> filas = new java.util.ArrayList<>();
             for (Prestamo p : tabla.getItems()) {
                 filas.add(new String[] {
@@ -169,11 +177,11 @@ public class PanelPrestamos {
             }
             String ruta = archivo.getAbsolutePath();
             if (ruta.toLowerCase().endsWith(".pdf")) {
-                Exportador.exportarPDF(ruta, "Reporte de Préstamos", encabezados, filas);
+                Exportador.exportarPDF(ruta, "Reporte de PrÃ©stamos", encabezados, filas);
             } else {
                 if (!ruta.toLowerCase().endsWith(".xlsx"))
                     ruta += ".xlsx";
-                Exportador.exportarExcel(ruta, "Préstamos", encabezados, filas);
+                Exportador.exportarExcel(ruta, "PrÃ©stamos", encabezados, filas);
             }
             mostrarAlerta("Reporte exportado:\n" + ruta);
         } catch (Exception ex) {
@@ -184,11 +192,11 @@ public class PanelPrestamos {
     private void registrarDevolucion() {
         Prestamo sel = tabla.getSelectionModel().getSelectedItem();
         if (sel == null) {
-            mostrarAlerta("Seleccioná un préstamo primero");
+            mostrarAlerta("SeleccionÃ¡ un prÃ©stamo primero");
             return;
         }
         if (sel.getFechaRealDevolucion() != null) {
-            mostrarAlerta("Este préstamo ya fue devuelto.\nFecha: " + sel.getFechaRealDevolucion());
+            mostrarAlerta("Este prÃ©stamo ya fue devuelto.\nFecha: " + sel.getFechaRealDevolucion());
             return;
         }
 
@@ -196,10 +204,10 @@ public class PanelPrestamos {
             try {
                 api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
                 cargar();
-                mostrarAlerta("Devolución registrada correctamente");
+                mostrarAlerta("DevoluciÃ³n registrada correctamente");
             } catch (Exception ex) {
                 ex.printStackTrace();
-                mostrarAlerta("Error al registrar devolución:\n" + ex.getMessage());
+                mostrarAlerta("Error al registrar devoluciÃ³n:\n" + ex.getMessage());
             }
         });
     }

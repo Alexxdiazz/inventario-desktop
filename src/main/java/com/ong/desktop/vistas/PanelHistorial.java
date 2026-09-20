@@ -22,9 +22,12 @@ public class PanelHistorial {
     private final ApiServicio api = new ApiServicio();
     private final TableView<HistorialMovimiento> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelHistorial(Stage owner) {
+    public PanelHistorial(Stage owner, String rol) {
         this.owner = owner;
+        this.rol = rol;
+        
     }
 
     public VBox construir() {
@@ -74,7 +77,12 @@ public class PanelHistorial {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -144,7 +152,7 @@ public class PanelHistorial {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Artículo", "Usuario", "Operación", "Estado anterior", "Estado nuevo", "Descripción"};
+            String[] encabezados = {"ID", "ArtÃ­culo", "Usuario", "OperaciÃ³n", "Estado anterior", "Estado nuevo", "DescripciÃ³n"};
             List<String[]> filas = new java.util.ArrayList<>();
             for (HistorialMovimiento h : tabla.getItems()) {
                 filas.add(new String[]{

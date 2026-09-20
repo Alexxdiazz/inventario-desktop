@@ -19,9 +19,12 @@ public class PanelCategorias {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Categoria> tabla = new TableView<>();
     private final Stage owner;
+     private final String rol;
+    
 
-    public PanelCategorias(Stage owner) {
+    public PanelCategorias(Stage owner, String rol) {
         this.owner = owner;
+         this.rol = rol; 
     }
 
     public VBox construir() {
@@ -55,7 +58,12 @@ public class PanelCategorias {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -116,7 +124,7 @@ public class PanelCategorias {
     }
         private void exportar() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Guardar reporte de categorías");
+        fc.setTitle("Guardar reporte de categorÃ­as");
         fc.setInitialFileName("categorias");
         fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
@@ -125,7 +133,7 @@ public class PanelCategorias {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Nombre", "Descripción"};
+            String[] encabezados = {"ID", "Nombre", "DescripciÃ³n"};
             List<String[]> filas = new java.util.ArrayList<>();
             for (Categoria c : tabla.getItems()) {
                 filas.add(new String[]{
@@ -136,10 +144,10 @@ public class PanelCategorias {
             }
             String ruta = archivo.getAbsolutePath();
             if (ruta.toLowerCase().endsWith(".pdf")) {
-                Exportador.exportarPDF(ruta, "Reporte de Categorías", encabezados, filas);
+                Exportador.exportarPDF(ruta, "Reporte de CategorÃ­as", encabezados, filas);
             } else {
                 if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
-                Exportador.exportarExcel(ruta, "Categorías", encabezados, filas);
+                Exportador.exportarExcel(ruta, "CategorÃ­as", encabezados, filas);
             }
             mostrarAlerta("Reporte exportado:\n" + ruta);
         } catch (Exception ex) {

@@ -21,9 +21,11 @@ public class PanelUsuarios {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Usuario> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelUsuarios(Stage owner) {
+    public PanelUsuarios(Stage owner, String rol) {
         this.owner = owner;
+        this.rol = rol;
     }
 
     public VBox construir() {
@@ -65,7 +67,12 @@ public class PanelUsuarios {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -105,7 +112,7 @@ public class PanelUsuarios {
         Usuario sel = tabla.getSelectionModel().getSelectedItem();
         if (sel == null) { mostrarAlerta("Selecciona un usuario primero"); return; }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("¿Eliminar este usuario?");
+        confirmacion.setHeaderText("Â¿Eliminar este usuario?");
         confirmacion.setContentText(sel.getNombre());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {

@@ -22,9 +22,11 @@ public class PanelEntregas {
     private final ApiServicio api = new ApiServicio();
     private final TableView<EntregaDefinitiva> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelEntregas(Stage owner) {
+    public PanelEntregas(Stage owner, String rol) {
         this.owner = owner;
+        this.rol = rol;
     }
 
     public VBox construir() {
@@ -70,7 +72,12 @@ public class PanelEntregas {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -140,7 +147,7 @@ public class PanelEntregas {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Receptor", "Artículo", "Cantidad", "Responsable", "Motivo/Campaña"};
+            String[] encabezados = {"ID", "Receptor", "ArtÃ­culo", "Cantidad", "Responsable", "Motivo/CampaÃ±a"};
             List<String[]> filas = new java.util.ArrayList<>();
             for (EntregaDefinitiva en : tabla.getItems()) {
                 filas.add(new String[]{

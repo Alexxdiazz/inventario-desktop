@@ -19,9 +19,12 @@ public class PanelEntidades {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Entidad> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelEntidades(Stage owner) {
+    public PanelEntidades(Stage owner, String rol) {
         this.owner = owner;
+        this.rol = rol;
+
     }
 
     public VBox construir() {
@@ -41,7 +44,7 @@ public class PanelEntidades {
         colDocumento.setCellValueFactory(new PropertyValueFactory<>("documentoIdentidad"));
         colDocumento.setPrefWidth(120);
 
-        TableColumn<Entidad, String> colTelefono = new TableColumn<>("Teléfono");
+        TableColumn<Entidad, String> colTelefono = new TableColumn<>("TelÃ©fono");
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colTelefono.setPrefWidth(120);
 
@@ -67,7 +70,12 @@ public class PanelEntidades {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -107,7 +115,7 @@ public class PanelEntidades {
         Entidad sel = tabla.getSelectionModel().getSelectedItem();
         if (sel == null) { mostrarAlerta("Selecciona una entidad primero"); return; }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("¿Eliminar esta entidad?");
+        confirmacion.setHeaderText("Â¿Eliminar esta entidad?");
         confirmacion.setContentText(sel.getNombreCompleto());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {
@@ -137,7 +145,7 @@ public class PanelEntidades {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Tipo", "Nombre", "Documento", "Teléfono", "Email", "Dirección"};
+            String[] encabezados = {"ID", "Tipo", "Nombre", "Documento", "TelÃ©fono", "Email", "DirecciÃ³n"};
             List<String[]> filas = new java.util.ArrayList<>();
             for (Entidad en : tabla.getItems()) {
                 filas.add(new String[]{

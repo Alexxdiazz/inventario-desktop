@@ -19,9 +19,11 @@ public class PanelUbicaciones {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Ubicacion> tabla = new TableView<>();
     private final Stage owner;
+    private final String rol;
 
-    public PanelUbicaciones(Stage owner) {
+    public PanelUbicaciones(Stage owner, String rol) {
         this.owner = owner;
+        this.rol = rol;
     }
 
     public VBox construir() {
@@ -55,7 +57,12 @@ public class PanelUbicaciones {
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        HBox barraBotones;
+        if ("CONSULTA".equals(rol)) {
+            barraBotones = new HBox(10, btnRecargar, btnExportar);
+        } else {
+            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+        }
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -125,7 +132,7 @@ public class PanelUbicaciones {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Nombre", "Descripción"};
+            String[] encabezados = {"ID", "Nombre", "DescripciÃ³n"};
             List<String[]> filas = new java.util.ArrayList<>();
             for (Ubicacion u : tabla.getItems()) {
                 filas.add(new String[]{
