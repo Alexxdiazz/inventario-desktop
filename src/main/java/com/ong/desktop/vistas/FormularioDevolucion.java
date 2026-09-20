@@ -79,28 +79,34 @@ public class FormularioDevolucion {
         btnCancelar.setOnAction(e -> ventana.close());
 
         btnGuardar.setOnAction(e -> {
-            try {
-                if (cmbResponsable.getValue() == null) {
-                    throw new Exception("Seleccioná quién recibe la devolución");
-                }
+    try {
+        if (cmbResponsable.getValue() == null) {
+            throw new Exception("Seleccioná quién recibe la devolución");
+        }
 
-                prestamo.setFechaRealDevolucion(LocalDateTime.now());
-                prestamo.setEstadoDevolucion(cmbEstado.getValue());
-                prestamo.setResponsableRecepcionDevolucion(cmbResponsable.getValue());
-                if (txtObservaciones.getText() != null && !txtObservaciones.getText().isEmpty()) {
-                    String obs = prestamo.getObservaciones() != null ? prestamo.getObservaciones() : "";
-                    prestamo.setObservaciones(obs + "\n[DEVOLUCIÓN] " + txtObservaciones.getText());
-                }
+        // ===== 1. Actualizar el préstamo =====
+        prestamo.setFechaRealDevolucion(LocalDateTime.now());
+        prestamo.setEstadoDevolucion(cmbEstado.getValue());
+        prestamo.setResponsableRecepcionDevolucion(cmbResponsable.getValue());
+        if (txtObservaciones.getText() != null && !txtObservaciones.getText().isEmpty()) {
+            String obs = prestamo.getObservaciones() != null ? prestamo.getObservaciones() : "";
+            prestamo.setObservaciones(obs + "\n[DEVOLUCIÓN] " + txtObservaciones.getText());
+        }
 
-                callback.guardar(prestamo);
-                ventana.close();
-            } catch (Exception ex) {
-                Alert alerta = new Alert(Alert.AlertType.ERROR);
-                alerta.setHeaderText("Datos inválidos");
-                alerta.setContentText(ex.getMessage());
-                alerta.showAndWait();
-            }
-        });
+        // ===== 2. Actualizar el estado del artículo =====
+        if (prestamo.getArticulo() != null) {
+            prestamo.getArticulo().setEstadoActual("DISPONIBLE");
+        }
+
+        callback.guardar(prestamo);
+        ventana.close();
+    } catch (Exception ex) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setHeaderText("Datos inválidos");
+        alerta.setContentText(ex.getMessage());
+        alerta.showAndWait();
+    }
+});
 
         grid.add(btnGuardar, 0, 9);
         grid.add(btnCancelar, 1, 9);

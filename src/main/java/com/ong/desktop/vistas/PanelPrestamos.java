@@ -1,10 +1,9 @@
 
 package com.ong.desktop.vistas;
-
 import java.io.File;
 import java.util.List;
-
 import com.ong.desktop.modelos.Prestamo;
+import com.ong.desktop.modelos.Articulo;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -190,25 +189,34 @@ public class PanelPrestamos {
     }
 
     private void registrarDevolucion() {
-        Prestamo sel = tabla.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            mostrarAlerta("SeleccionÃ¡ un prÃ©stamo primero");
-            return;
-        }
-        if (sel.getFechaRealDevolucion() != null) {
-            mostrarAlerta("Este prÃ©stamo ya fue devuelto.\nFecha: " + sel.getFechaRealDevolucion());
-            return;
-        }
-
-        FormularioDevolucion.mostrar(owner, sel, prestamo -> {
-            try {
-                api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
-                cargar();
-                mostrarAlerta("DevoluciÃ³n registrada correctamente");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                mostrarAlerta("Error al registrar devoluciÃ³n:\n" + ex.getMessage());
-            }
-        });
+    Prestamo sel = tabla.getSelectionModel().getSelectedItem();
+    if (sel == null) {
+        mostrarAlerta("Seleccioná un préstamo primero");
+        return;
     }
+    if (sel.getFechaRealDevolucion() != null) {
+        mostrarAlerta("Este préstamo ya fue devuelto.\nFecha: " + sel.getFechaRealDevolucion());
+        return;
+    }
+
+    FormularioDevolucion.mostrar(owner, sel, prestamo -> {
+        try {
+            // 1. Actualizar el préstamo
+            api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
+
+            // 2. Actualizar el estado del artículo (si tiene uno asignado)
+            if (prestamo.getArticulo() != null) {
+                Articulo articulo = prestamo.getArticulo();
+                articulo.setEstadoActual("DISPONIBLE");
+                api.actualizarArticulo(articulo.getIdArticulo(), articulo);
+            }
+
+            cargar();
+            mostrarAlerta("Devolución registrada correctamente.\nEl artículo volvió a estar DISPONIBLE.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al registrar devolución:\n" + ex.getMessage());
+        }
+    });
+}
 }
