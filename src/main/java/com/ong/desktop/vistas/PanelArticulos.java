@@ -1,4 +1,5 @@
 package com.ong.desktop.vistas;
+
 import com.ong.desktop.modelos.Articulo;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
@@ -8,7 +9,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.TableRow;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PanelArticulos {
 
@@ -16,49 +19,58 @@ public class PanelArticulos {
     private final TableView<Articulo> tabla = new TableView<>();
     private final Stage owner;
 
+    // Lista maestra con TODOS los artículos
+    private final ObservableList<Articulo> todosLosArticulos = FXCollections.observableArrayList();
+
+    // Filtros
+    private final TextField txtBuscar = new TextField();
+    private final ComboBox<String> cmbEstado = new ComboBox<>();
+    private final ComboBox<String> cmbCategoria = new ComboBox<>();
+
     public PanelArticulos(Stage owner) {
         this.owner = owner;
     }
 
     public VBox construir() {
+        // ===== Columnas =====
         TableColumn<Articulo, Integer> colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("idArticulo"));
-        colId.setPrefWidth(60);
+        colId.setPrefWidth(50);
 
-        TableColumn<Articulo, String> colCodigo = new TableColumn<>("Codigo");
+        TableColumn<Articulo, String> colCodigo = new TableColumn<>("Código");
         colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigoInventario"));
-        colCodigo.setPrefWidth(120);
+        colCodigo.setPrefWidth(110);
 
         TableColumn<Articulo, String> colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colNombre.setPrefWidth(200);
+        colNombre.setPrefWidth(180);
 
-        TableColumn<Articulo, Integer> colCantidad = new TableColumn<>("Cantidad");
+        TableColumn<Articulo, Integer> colCantidad = new TableColumn<>("Cant.");
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-        colCantidad.setPrefWidth(80);
+        colCantidad.setPrefWidth(60);
 
         TableColumn<Articulo, String> colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estadoActual"));
-        colEstado.setPrefWidth(120);
+        colEstado.setPrefWidth(110);
 
-        TableColumn<Articulo, String> colDescripcion = new TableColumn<>("Descripcion");
+        TableColumn<Articulo, String> colDescripcion = new TableColumn<>("Descripción");
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         colDescripcion.setPrefWidth(180);
 
-        TableColumn<Articulo, String> colConservacion = new TableColumn<>("Conservacion");
+        TableColumn<Articulo, String> colConservacion = new TableColumn<>("Conservación");
         colConservacion.setCellValueFactory(new PropertyValueFactory<>("estadoConservacion"));
-        colConservacion.setPrefWidth(120);
+        colConservacion.setPrefWidth(110);
 
         tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion);
-                // Pintar de rojo las filas de artículos con stock bajo
-                // Pintar de rojo las filas de artículos con stock bajo
+
+        // Pintar de rojo las filas con stock bajo
         tabla.setRowFactory(tv -> new TableRow<Articulo>() {
             @Override
             protected void updateItem(Articulo item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item == null || empty) {
                     setStyle("");
-                } else if (item.getStockMinimo() != null 
+                } else if (item.getStockMinimo() != null
                         && item.getCantidad() != null
                         && item.getCantidad() <= item.getStockMinimo()) {
                     setStyle("-fx-background-color: #ffcccc;");
@@ -68,6 +80,43 @@ public class PanelArticulos {
             }
         });
 
+        // ===== Filtros =====
+        txtBuscar.setPromptText("🔍 Buscar por nombre, código o descripción...");
+        txtBuscar.setPrefWidth(280);
+
+        cmbEstado.setPromptText("Estado");
+        cmbEstado.getItems().addAll("", "DISPONIBLE", "RESERVADO", "PRESTADO", "EN_REPARACION", "ENTREGADO", "BAJA");
+        cmbEstado.setPrefWidth(140);
+
+        cmbCategoria.setPromptText("Categoría");
+        cmbCategoria.getItems().add(""); // opción "todas"
+        // Las categorías se cargarán desde la API
+        try {
+            api.listarCategorias().forEach(c -> cmbCategoria.getItems().add(c.getIdCategoria() + " - " + c.getNombre()));
+        } catch (Exception e) {
+            // Si falla, dejamos solo "todas"
+            e.printStackTrace();
+        }
+        cmbCategoria.setPrefWidth(180);
+
+        Button btnLimpiar = new Button("Limpiar");
+        btnLimpiar.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-cursor: hand;");
+        btnLimpiar.setOnAction(e -> {
+            txtBuscar.clear();
+            cmbEstado.setValue("");
+            cmbCategoria.setValue("");
+            aplicarFiltros();
+        });
+
+        // Escuchar cambios en los filtros
+        txtBuscar.textProperty().addListener((obs, oldV, newV) -> aplicarFiltros());
+        cmbEstado.valueProperty().addListener((obs, oldV, newV) -> aplicarFiltros());
+        cmbCategoria.valueProperty().addListener((obs, oldV, newV) -> aplicarFiltros());
+
+        HBox barraFiltros = new HBox(10, txtBuscar, cmbEstado, cmbCategoria, btnLimpiar);
+        barraFiltros.setStyle("-fx-padding: 10px; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1px 0;");
+
+        // ===== Botones CRUD =====
         Button btnNuevo = new Button("Nuevo");
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
@@ -76,7 +125,7 @@ public class PanelArticulos {
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
             Articulo sel = tabla.getSelectionModel().getSelectedItem();
-            if (sel == null) { mostrarAlerta("Selecciona un articulo primero"); return; }
+            if (sel == null) { mostrarAlerta("Seleccioná un artículo primero"); return; }
             abrirFormulario(sel);
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
@@ -85,8 +134,9 @@ public class PanelArticulos {
         HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
         barraBotones.setStyle("-fx-padding: 10px;");
 
-        VBox panel = new VBox(10, barraBotones, tabla);
+        VBox panel = new VBox(0, barraFiltros, barraBotones, tabla);
         panel.setStyle("-fx-padding: 15px;");
+        VBox.setVgrow(tabla, javafx.scene.layout.Priority.ALWAYS);
 
         cargar();
         return panel;
@@ -94,12 +144,56 @@ public class PanelArticulos {
 
     private void cargar() {
         try {
-            ObservableList<Articulo> datos = FXCollections.observableArrayList(api.listarArticulos());
-            tabla.setItems(datos);
+            List<Articulo> lista = api.listarArticulos();
+            todosLosArticulos.setAll(lista);
+            aplicarFiltros();
         } catch (Exception e) {
             e.printStackTrace();
             mostrarAlerta("No se pudo conectar con la API:\n" + e.getMessage());
         }
+    }
+
+    private void aplicarFiltros() {
+        String texto = txtBuscar.getText() != null ? txtBuscar.getText().toLowerCase().trim() : "";
+        String estado = cmbEstado.getValue();
+        String categoria = cmbCategoria.getValue();
+
+        // Extraer el ID de la categoría seleccionada
+        Integer idCategoriaFiltro = null;
+        if (categoria != null && !categoria.isEmpty()) {
+            try {
+                idCategoriaFiltro = Integer.parseInt(categoria.split(" - ")[0]);
+            } catch (NumberFormatException ex) {
+                // ignorar
+            }
+        }
+
+        final Integer idCat = idCategoriaFiltro;
+
+        List<Articulo> filtrados = todosLosArticulos.stream()
+                .filter(a -> {
+                    // Filtro de texto
+                    if (!texto.isEmpty()) {
+                        String nombre = a.getNombre() != null ? a.getNombre().toLowerCase() : "";
+                        String codigo = a.getCodigoInventario() != null ? a.getCodigoInventario().toLowerCase() : "";
+                        String desc = a.getDescripcion() != null ? a.getDescripcion().toLowerCase() : "";
+                        if (!nombre.contains(texto) && !codigo.contains(texto) && !desc.contains(texto)) {
+                            return false;
+                        }
+                    }
+                    // Filtro de estado
+                    if (estado != null && !estado.isEmpty()) {
+                        if (!estado.equals(a.getEstadoActual())) return false;
+                    }
+                    // Filtro de categoría
+                    if (idCat != null) {
+                        if (a.getIdCategoria() == null || !a.getIdCategoria().equals(idCat)) return false;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        tabla.setItems(FXCollections.observableArrayList(filtrados));
     }
 
     private void abrirFormulario(Articulo existente) {
@@ -120,9 +214,9 @@ public class PanelArticulos {
 
     private void eliminarSeleccionado() {
         Articulo sel = tabla.getSelectionModel().getSelectedItem();
-        if (sel == null) { mostrarAlerta("Selecciona un articulo primero"); return; }
+        if (sel == null) { mostrarAlerta("Seleccioná un artículo primero"); return; }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("Eliminar este articulo?");
+        confirmacion.setHeaderText("¿Eliminar este artículo?");
         confirmacion.setContentText(sel.getNombre());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {
