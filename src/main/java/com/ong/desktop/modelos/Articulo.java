@@ -14,6 +14,8 @@ public class Articulo {
     private String estadoConservacion;
     private Integer idCategoria;
     private Integer idUbicacion;
+    private Integer stockMinimo;
+    
 
     public Integer getIdArticulo() { return idArticulo; }
     public void setIdArticulo(Integer idArticulo) { this.idArticulo = idArticulo; }
@@ -41,6 +43,10 @@ public class Articulo {
 
     public Integer getIdUbicacion() { return idUbicacion; }
     public void setIdUbicacion(Integer idUbicacion) { this.idUbicacion = idUbicacion; }
+        public Integer getStockMinimo() { return stockMinimo; }
+    public void setStockMinimo(Integer stockMinimo) { this.stockMinimo = stockMinimo; }
+    
+
 
         @Override
     public String toString() {
