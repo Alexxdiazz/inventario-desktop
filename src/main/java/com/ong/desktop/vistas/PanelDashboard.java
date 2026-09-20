@@ -80,7 +80,7 @@ public class PanelDashboard {
                     crearTarjeta("RESERVADOS", reservados, "#ffc107"),
                     crearTarjeta("PRESTADOS", prestados, "#17a2b8"),
                     crearTarjeta("EN REPARACIÓN", enReparacion, "#dc3545"),
-                    crearTarjeta("STOCK MÍNIMO", stockMinimo, "#fd7e14"),
+                    crearTarjeta("⚠ STOCK MÍNIMO", stockMinimo, stockMinimo > 0 ? "#dc3545" : "#28a745"),
                     crearTarjeta("DONACIONES", donaciones.size(), "#d63384"),
                     crearTarjeta("ENTREGAS", entregas.size(), "#6f42c1"),
                     crearTarjeta("PRÉSTAMOS", prestamos.size(), "#20c997")

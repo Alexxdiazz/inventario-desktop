@@ -29,16 +29,18 @@ public class FormularioArticulo {
         TextField txtNombre = new TextField();
         TextField txtDescripcion = new TextField();
         TextField txtCantidad = new TextField();
+        TextField txtStockMinimo = new TextField();
         ComboBox<String> cmbEstado = new ComboBox<>();
         cmbEstado.getItems().addAll("DISPONIBLE", "RESERVADO", "PRESTADO", "EN_REPARACION", "ENTREGADO", "BAJA");
         ComboBox<String> cmbConservacion = new ComboBox<>();
         cmbConservacion.getItems().addAll("NUEVO", "BUENO", "REGULAR", "DETERIORADO");
 
         System.out.println("ABriendo formulario");
-        System.out.println("Articulo existente: "+ (articuloExistente != null? "Si (id="+ articuloExistente.getIdArticulo()+")":"No(nuevo)"));
-        if(articuloExistente !=null){
-            System.out.println("Conservacion recibida: ["+articuloExistente.getEstadoConservacion()+"]");
-            System.out.println("Estado recibido:["+articuloExistente.getEstadoActual()+"]");
+        System.out.println("Articulo existente: "
+                + (articuloExistente != null ? "Si (id=" + articuloExistente.getIdArticulo() + ")" : "No(nuevo)"));
+        if (articuloExistente != null) {
+            System.out.println("Conservacion recibida: [" + articuloExistente.getEstadoConservacion() + "]");
+            System.out.println("Estado recibido:[" + articuloExistente.getEstadoActual() + "]");
 
         }
 
@@ -47,12 +49,14 @@ public class FormularioArticulo {
             txtNombre.setText(articuloExistente.getNombre());
             txtDescripcion.setText(articuloExistente.getDescripcion());
             txtCantidad.setText(String.valueOf(articuloExistente.getCantidad()));
+            txtStockMinimo.setText(String.valueOf(articuloExistente.getStockMinimo() != null ? articuloExistente.getStockMinimo() : 0));
+
 
             String estado = articuloExistente.getEstadoActual();
-            cmbEstado.setValue(estado != null? estado : "DISPONIBLE");
+            cmbEstado.setValue(estado != null ? estado : "DISPONIBLE");
 
             String conservacion = articuloExistente.getEstadoConservacion();
-            cmbConservacion.setValue(conservacion != null? conservacion : "BUENO");
+            cmbConservacion.setValue(conservacion != null ? conservacion : "BUENO");
         } else {
             cmbEstado.setValue("DISPONIBLE");
             cmbConservacion.setValue("BUENO");
@@ -70,6 +74,8 @@ public class FormularioArticulo {
         grid.add(cmbEstado, 1, 4);
         grid.add(new Label("Conservación:"), 0, 5);
         grid.add(cmbConservacion, 1, 5);
+        grid.add(new Label("Stock mínimo:"), 0, 6);
+        grid.add(txtStockMinimo, 1, 6);
 
         Button btnGuardar = new Button("Guardar");
         Button btnCancelar = new Button("Cancelar");
@@ -84,13 +90,22 @@ public class FormularioArticulo {
                 a.setCantidad(Integer.parseInt(txtCantidad.getText()));
                 a.setEstadoActual(cmbEstado.getValue());
                 a.setEstadoConservacion(cmbConservacion.getValue());
+
+                 if (!txtStockMinimo.getText().isEmpty()) {
+            a.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
+        } else {
+            a.setStockMinimo(0);
+        }
+
+
+
                 if (articuloExistente != null) {
                     a.setIdArticulo(articuloExistente.getIdArticulo());
                     a.setIdCategoria(articuloExistente.getIdCategoria());
                     a.setIdUbicacion(articuloExistente.getIdUbicacion());
                 } else {
-                    a.setIdCategoria(1); 
-                    a.setIdUbicacion(1); 
+                    a.setIdCategoria(1);
+                    a.setIdUbicacion(1);
                 }
                 callback.guardar(a);
                 ventana.close();
@@ -103,8 +118,8 @@ public class FormularioArticulo {
             }
         });
 
-        grid.add(btnGuardar, 0, 6);
-        grid.add(btnCancelar, 1, 6);
+        grid.add(btnGuardar, 0, 7);
+        grid.add(btnCancelar, 1, 7);
 
         Scene scene = new Scene(grid, 400, 350);
         ventana.setScene(scene);

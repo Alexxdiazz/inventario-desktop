@@ -1,5 +1,4 @@
 package com.ong.desktop.vistas;
-
 import com.ong.desktop.modelos.Articulo;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
@@ -9,6 +8,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.control.TableRow;
 
 public class PanelArticulos {
 
@@ -50,6 +50,23 @@ public class PanelArticulos {
         colConservacion.setPrefWidth(120);
 
         tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion);
+                // Pintar de rojo las filas de artículos con stock bajo
+                // Pintar de rojo las filas de artículos con stock bajo
+        tabla.setRowFactory(tv -> new TableRow<Articulo>() {
+            @Override
+            protected void updateItem(Articulo item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setStyle("");
+                } else if (item.getStockMinimo() != null 
+                        && item.getCantidad() != null
+                        && item.getCantidad() <= item.getStockMinimo()) {
+                    setStyle("-fx-background-color: #ffcccc;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
 
         Button btnNuevo = new Button("Nuevo");
         Button btnEditar = new Button("Editar");
