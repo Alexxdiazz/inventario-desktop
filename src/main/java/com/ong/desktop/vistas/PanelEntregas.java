@@ -98,20 +98,33 @@ public class PanelEntregas {
     }
 
     private void abrirFormulario(EntregaDefinitiva existente) {
-        FormularioEntrega.mostrar(owner, existente, entrega -> {
-            try {
-                if (entrega.getIdEntrega() == null) {
-                    api.crearEntrega(entrega);
-                } else {
-                    api.actualizarEntrega(entrega.getIdEntrega(), entrega);
+    FormularioEntrega.mostrar(owner, existente, entrega -> {
+        try {
+            if (entrega.getIdEntrega() == null) {
+                // NUEVA entrega
+                EntregaDefinitiva creada = api.crearEntrega(entrega);
+                // Registrar en historial
+                if (creada.getArticulo() != null && creada.getResponsable() != null) {
+                    String receptor = creada.getReceptor() != null ? creada.getReceptor().getNombreCompleto() : "sin receptor";
+                    api.registrarMovimiento(
+                            creada.getArticulo().getIdArticulo(),
+                            creada.getResponsable().getIdUsuario(),
+                            "ENTREGA",
+                            "DISPONIBLE",
+                            "ENTREGADO",
+                            "Entrega a " + receptor + " (cantidad: " + creada.getCantidad() + ")"
+                    );
                 }
-                cargar();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                mostrarAlerta("Error al guardar:\n" + ex.getMessage());
+            } else {
+                api.actualizarEntrega(entrega.getIdEntrega(), entrega);
             }
-        });
-    }
+            cargar();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al guardar:\n" + ex.getMessage());
+        }
+    });
+}
 
     private void eliminarSeleccionado() {
         EntregaDefinitiva sel = tabla.getSelectionModel().getSelectedItem();

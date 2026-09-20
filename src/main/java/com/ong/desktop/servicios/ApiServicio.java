@@ -520,4 +520,51 @@ public class ApiServicio {
             throw new RuntimeException("Error al iniciar sesión. Código: " + response.statusCode());
         }
     }
+        /**
+     * Registra un movimiento en el historial.
+     * @param idArticulo ID del artículo afectado
+     * @param idUsuario ID del usuario que hizo la acción
+     * @param tipoOperacion Texto corto: CREACION, PRESTAMO, DEVOLUCION, ENTREGA, EDICION, BAJA
+     * @param estadoAnterior Estado anterior (puede ser null)
+     * @param estadoNuevo Estado nuevo (puede ser null)
+     * @param descripcion Descripción del movimiento
+     */
+    public void registrarMovimiento(Integer idArticulo, Integer idUsuario, String tipoOperacion,
+                                     String estadoAnterior, String estadoNuevo, String descripcion) {
+        try {
+            // Construimos el JSON manualmente (más simple)
+            StringBuilder json = new StringBuilder();
+            json.append("{");
+            json.append("\"articulo\":{\"idArticulo\":").append(idArticulo).append("},");
+            json.append("\"usuario\":{\"idUsuario\":").append(idUsuario).append("},");
+            json.append("\"tipoOperacion\":\"").append(tipoOperacion).append("\"");
+            if (estadoAnterior != null) {
+                json.append(",\"estadoAnterior\":\"").append(estadoAnterior).append("\"");
+            }
+            if (estadoNuevo != null) {
+                json.append(",\"estadoNuevo\":\"").append(estadoNuevo).append("\"");
+            }
+            if (descripcion != null) {
+                // Escapamos comillas para no romper el JSON
+                String desc = descripcion.replace("\"", "\\\"");
+                json.append(",\"descripcionMovimiento\":\"").append(desc).append("\"");
+            }
+            json.append("}");
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/historial"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200 && response.statusCode() != 201) {
+                System.err.println("Aviso: no se pudo registrar movimiento. Código: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            // No lanzamos excepción para no romper el flujo principal
+            System.err.println("Aviso: error al registrar movimiento: " + e.getMessage());
+        }
+    }
 }

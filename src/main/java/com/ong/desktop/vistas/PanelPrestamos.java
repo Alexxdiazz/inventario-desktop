@@ -109,20 +109,33 @@ public class PanelPrestamos {
     }
 
     private void abrirFormulario(Prestamo existente) {
-        FormularioPrestamo.mostrar(owner, existente, prestamo -> {
-            try {
-                if (prestamo.getIdPrestamo() == null) {
-                    api.crearPrestamo(prestamo);
-                } else {
-                    api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
+    FormularioPrestamo.mostrar(owner, existente, prestamo -> {
+        try {
+            if (prestamo.getIdPrestamo() == null) {
+                // NUEVO préstamo
+                Prestamo creado = api.crearPrestamo(prestamo);
+                // Registrar en historial
+                if (creado.getArticulo() != null && creado.getResponsable() != null) {
+                    String receptor = creado.getReceptor() != null ? creado.getReceptor().getNombreCompleto() : "sin receptor";
+                    api.registrarMovimiento(
+                            creado.getArticulo().getIdArticulo(),
+                            creado.getResponsable().getIdUsuario(),
+                            "PRESTAMO",
+                            "DISPONIBLE",
+                            "PRESTADO",
+                            "Préstamo a " + receptor + " (cantidad: " + creado.getCantidad() + ")"
+                    );
                 }
-                cargar();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                mostrarAlerta("Error al guardar:\n" + ex.getMessage());
+            } else {
+                api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
             }
-        });
-    }
+            cargar();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al guardar:\n" + ex.getMessage());
+        }
+    });
+}
 
     private void eliminarSeleccionado() {
         Prestamo sel = tabla.getSelectionModel().getSelectedItem();
@@ -199,24 +212,33 @@ public class PanelPrestamos {
         return;
     }
 
-    FormularioDevolucion.mostrar(owner, sel, prestamo -> {
-        try {
-            // 1. Actualizar el préstamo
-            api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
+   FormularioDevolucion.mostrar(owner, sel, prestamo -> {
+    try {
+        api.actualizarPrestamo(prestamo.getIdPrestamo(), prestamo);
+        if (prestamo.getArticulo() != null) {
+            Articulo articulo = prestamo.getArticulo();
+            articulo.setEstadoActual("DISPONIBLE");
+            api.actualizarArticulo(articulo.getIdArticulo(), articulo);
 
-            // 2. Actualizar el estado del artículo (si tiene uno asignado)
-            if (prestamo.getArticulo() != null) {
-                Articulo articulo = prestamo.getArticulo();
-                articulo.setEstadoActual("DISPONIBLE");
-                api.actualizarArticulo(articulo.getIdArticulo(), articulo);
+            // Registrar en historial
+            if (prestamo.getResponsableRecepcionDevolucion() != null) {
+                String receptor = prestamo.getReceptor() != null ? prestamo.getReceptor().getNombreCompleto() : "sin receptor";
+                api.registrarMovimiento(
+                        articulo.getIdArticulo(),
+                        prestamo.getResponsableRecepcionDevolucion().getIdUsuario(),
+                        "DEVOLUCION",
+                        "PRESTADO",
+                        "DISPONIBLE",
+                        "Devolución de " + receptor + " (estado: " + prestamo.getEstadoDevolucion() + ")"
+                );
             }
-
-            cargar();
-            mostrarAlerta("Devolución registrada correctamente.\nEl artículo volvió a estar DISPONIBLE.");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            mostrarAlerta("Error al registrar devolución:\n" + ex.getMessage());
         }
-    });
+        cargar();
+        mostrarAlerta("Devolución registrada correctamente.\nEl artículo volvió a estar DISPONIBLE.");
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        mostrarAlerta("Error al registrar devolución:\n" + ex.getMessage());
+    }
+});
 }
 }
