@@ -94,6 +94,8 @@ public class App extends Application {
                 "Entregas", stage, "entregas");
         agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
                 "Historial", stage, "historial");
+        agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
+                "Reservas", stage, "reservas");
 
         root.setLeft(menuLateral);
 
@@ -138,7 +140,6 @@ public class App extends Application {
         root.setCenter(panel);
     }
 
-    
     private void agregarBotonSi(String rolUsuario, String[] rolesPermitidos, String textoBoton, Stage stage,
             String tipo) {
         boolean permitido = false;
@@ -156,18 +157,30 @@ public class App extends Application {
         menuLateral.getChildren().add(btn);
     }
 
-        private VBox crearPanelPorTipo(String tipo, Stage stage, String rol) {
+    private VBox crearPanelPorTipo(String tipo, Stage stage, String rol) {
         switch (tipo) {
-            case "articulos":   return new PanelArticulos(stage, rol).construir();
-            case "categorias":  return new PanelCategorias(stage, rol).construir();
-            case "ubicaciones": return new PanelUbicaciones(stage, rol).construir();
-            case "usuarios":    return new PanelUsuarios(stage, rol).construir();
-            case "entidades":   return new PanelEntidades(stage, rol).construir();
-            case "donaciones":  return new PanelDonaciones(stage, rol).construir();
-            case "prestamos":   return new PanelPrestamos(stage, rol).construir();
-            case "entregas":    return new PanelEntregas(stage, rol).construir();
-            case "historial":   return new PanelHistorial(stage, rol).construir();
-            default: throw new IllegalArgumentException("Tipo desconocido: " + tipo);
+            case "articulos":
+                return new PanelArticulos(stage, rol).construir();
+            case "categorias":
+                return new PanelCategorias(stage, rol).construir();
+            case "ubicaciones":
+                return new PanelUbicaciones(stage, rol).construir();
+            case "usuarios":
+                return new PanelUsuarios(stage, rol).construir();
+            case "entidades":
+                return new PanelEntidades(stage, rol).construir();
+            case "donaciones":
+                return new PanelDonaciones(stage, rol).construir();
+            case "prestamos":
+                return new PanelPrestamos(stage, rol).construir();
+            case "entregas":
+                return new PanelEntregas(stage, rol).construir();
+            case "historial":
+                return new PanelHistorial(stage, rol).construir();
+            case "reservas":
+                return new PanelReservas(stage, rol).construir();
+            default:
+                throw new IllegalArgumentException("Tipo desconocido: " + tipo);
         }
     }
 

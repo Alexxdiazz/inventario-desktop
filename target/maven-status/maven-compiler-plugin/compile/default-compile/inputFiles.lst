@@ -6,6 +6,7 @@ C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\mod
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\EntregaDefinitiva.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\HistorialMovimiento.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\Prestamo.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\Reserva.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\Ubicacion.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\Usuario.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\servicios\ApiServicio.java
@@ -18,6 +19,7 @@ C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vis
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioEntrega.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioHistorial.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioPrestamo.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioReserva.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioUbicacion.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioUsuario.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelArticulos.java
@@ -28,6 +30,7 @@ C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vis
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelEntregas.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelHistorial.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelPrestamos.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelReservas.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelUbicaciones.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelUsuarios.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\VentanaLogin.java

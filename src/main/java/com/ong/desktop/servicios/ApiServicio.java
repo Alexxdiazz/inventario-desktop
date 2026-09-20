@@ -16,6 +16,7 @@ import com.ong.desktop.modelos.DonacionRecepcion;
 import com.ong.desktop.modelos.Prestamo;
 import com.ong.desktop.modelos.EntregaDefinitiva;
 import com.ong.desktop.modelos.HistorialMovimiento;
+import com.ong.desktop.modelos.Reserva;
 
 public class ApiServicio {
 
@@ -565,6 +566,58 @@ public class ApiServicio {
         } catch (Exception e) {
             // No lanzamos excepción para no romper el flujo principal
             System.err.println("Aviso: error al registrar movimiento: " + e.getMessage());
+        }
+    }
+        // ============ RESERVAS ============
+
+    public List<Reserva> listarReservas() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/reservas"))
+                .GET()
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Error al listar reservas. Código: " + response.statusCode());
+        }
+        return objectMapper.readValue(response.body(), new TypeReference<List<Reserva>>() {});
+    }
+
+    public Reserva crearReserva(Reserva reserva) throws Exception {
+        String json = objectMapper.writeValueAsString(reserva);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/reservas"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200 && response.statusCode() != 201) {
+            throw new RuntimeException("Error al crear reserva. Código: " + response.statusCode() + " - " + response.body());
+        }
+        return objectMapper.readValue(response.body(), Reserva.class);
+    }
+
+    public Reserva actualizarReserva(Integer id, Reserva reserva) throws Exception {
+        String json = objectMapper.writeValueAsString(reserva);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/reservas/" + id))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Error al actualizar reserva. Código: " + response.statusCode());
+        }
+        return objectMapper.readValue(response.body(), Reserva.class);
+    }
+
+    public void borrarReserva(Integer id) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/reservas/" + id))
+                .DELETE()
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 204 && response.statusCode() != 200) {
+            throw new RuntimeException("Error al borrar reserva. Código: " + response.statusCode());
         }
     }
 }
