@@ -1,8 +1,8 @@
 package com.ong.desktop;
 
+import com.ong.desktop.modelos.Usuario;
 import com.ong.desktop.vistas.*;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -19,20 +19,28 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        // Mostrar el login primero
+        VentanaLogin.mostrar(stage, usuario -> {
+            construirAppPrincipal(stage, usuario);
+        });
+    }
+
+    private void construirAppPrincipal(Stage stage, Usuario usuario) {
         root = new BorderPane();
 
         // ===== Barra superior =====
-        Label titulo = new Label("Sistema de Inventario - Mujeres Celebran la Vida");
-        titulo.setStyle(
-                "-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15px; -fx-background-color: #d63384; -fx-text-fill: white;");
+        Label titulo = new Label(
+                "Sistema de Inventario - Mujeres Celebran la Vida   |   " 
+                + usuario.getNombre() + " (" + usuario.getRol() + ")"
+        );
+        titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15px; -fx-background-color: #d63384; -fx-text-fill: white;");
         titulo.setMaxWidth(Double.MAX_VALUE);
         titulo.setAlignment(Pos.CENTER);
         root.setTop(titulo);
 
         // ===== Menú lateral =====
         menuLateral = new VBox(5);
-        menuLateral.setStyle(
-                "-fx-background-color: #f8f9fa; -fx-padding: 15px; -fx-min-width: 200px; -fx-border-color: #dee2e6; -fx-border-width: 0 1px 0 0;");
+        menuLateral.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 15px; -fx-min-width: 200px; -fx-border-color: #dee2e6; -fx-border-width: 0 1px 0 0;");
 
         Label lblMenu = new Label("MÓDULOS");
         lblMenu.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #6c757d; -fx-padding: 5px;");
@@ -61,14 +69,15 @@ public class App extends Application {
         btnHistorial.setOnAction(e -> mostrarPanel(btnHistorial, new PanelHistorial(stage).construir()));
 
         menuLateral.getChildren().addAll(
-                btnDashboard, btnArticulos, btnCategorias, btnUbicaciones, btnUsuarios, btnEntidades, btnDonaciones,
-                btnPrestamos,
-                btnEntregas, btnHistorial);
+                btnDashboard, btnArticulos, btnCategorias, btnUbicaciones, btnUsuarios,
+                btnEntidades, btnDonaciones, btnPrestamos, btnEntregas, btnHistorial
+        );
 
         root.setLeft(menuLateral);
 
-        // ===== Mostrar la primera pantalla por defecto =====
+        // Mostrar Dashboard al inicio
         mostrarPanel(btnDashboard, new PanelDashboard().construir());
+
         // ===== Escena =====
         Scene scene = new Scene(root, 1200, 700);
         stage.setTitle("Inventario - ONG");
@@ -80,34 +89,26 @@ public class App extends Application {
         Button btn = new Button(texto);
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setAlignment(Pos.CENTER_LEFT);
-        btn.setStyle(
-                "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+        btn.setStyle("-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
         btn.setOnMouseEntered(e -> {
             if (btn != botonActivo) {
-                btn.setStyle(
-                        "-fx-background-color: #e9ecef; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+                btn.setStyle("-fx-background-color: #e9ecef; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
             }
         });
         btn.setOnMouseExited(e -> {
             if (btn != botonActivo) {
-                btn.setStyle(
-                        "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+                btn.setStyle("-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
             }
         });
         return btn;
     }
 
-    private void mostrarPanel(Button boton, javafx.scene.layout.VBox panel) {
-        // Resetear estilo del botón anterior
+    private void mostrarPanel(Button boton, VBox panel) {
         if (botonActivo != null) {
-            botonActivo.setStyle(
-                    "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+            botonActivo.setStyle("-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
         }
-        // Marcar nuevo botón activo
         botonActivo = boton;
-        boton.setStyle(
-                "-fx-background-color: #d63384; -fx-text-fill: white; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
-        // Cambiar el panel
+        boton.setStyle("-fx-background-color: #d63384; -fx-text-fill: white; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
         root.setCenter(panel);
     }
 

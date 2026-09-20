@@ -498,4 +498,26 @@ public class ApiServicio {
             throw new RuntimeException("Error al borrar movimiento. Código: " + response.statusCode());
         }
     }
+        // ============ LOGIN ============
+
+    public Usuario login(String email, String password) throws Exception {
+        // Construir el JSON manualmente (simple)
+        String json = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/auth/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return objectMapper.readValue(response.body(), Usuario.class);
+        } else if (response.statusCode() == 401) {
+            throw new RuntimeException("Usuario o contraseña incorrectos");
+        } else {
+            throw new RuntimeException("Error al iniciar sesión. Código: " + response.statusCode());
+        }
+    }
 }
