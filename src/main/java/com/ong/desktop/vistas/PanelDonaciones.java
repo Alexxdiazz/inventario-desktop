@@ -1,5 +1,8 @@
 package com.ong.desktop.vistas;
 
+import java.io.File;
+import java.util.List;
+
 import com.ong.desktop.modelos.DonacionRecepcion;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
@@ -8,7 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import com.ong.desktop.servicios.Exportador;
+import javafx.stage.FileChooser;
+import java.io.File;
 
 public class PanelDonaciones {
 
@@ -43,6 +50,7 @@ public class PanelDonaciones {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
+        Button btnExportar = new Button("Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
@@ -52,8 +60,9 @@ public class PanelDonaciones {
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
+        btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
+      HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -111,5 +120,38 @@ public class PanelDonaciones {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
+    }
+        private void exportar() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Guardar reporte de donaciones");
+        fc.setInitialFileName("donaciones");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+        File archivo = fc.showSaveDialog(owner);
+        if (archivo == null) return;
+        try {
+            String[] encabezados = {"ID", "Donante", "Responsable", "Observaciones"};
+            List<String[]> filas = new java.util.ArrayList<>();
+            for (DonacionRecepcion d : tabla.getItems()) {
+                filas.add(new String[]{
+                        String.valueOf(d.getIdDonacion()),
+                        d.getDonante() != null ? d.getDonante().getNombreCompleto() : "",
+                        d.getResponsableRecepcion() != null ? d.getResponsableRecepcion().getNombre() : "",
+                        d.getObservaciones() != null ? d.getObservaciones() : ""
+                });
+            }
+            String ruta = archivo.getAbsolutePath();
+            if (ruta.toLowerCase().endsWith(".pdf")) {
+                Exportador.exportarPDF(ruta, "Reporte de Donaciones", encabezados, filas);
+            } else {
+                if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
+                Exportador.exportarExcel(ruta, "Donaciones", encabezados, filas);
+            }
+            mostrarAlerta("Reporte exportado:\n" + ruta);
+        } catch (Exception ex) {
+            mostrarAlerta("Error al exportar:\n" + ex.getMessage());
+        }
     }
 }

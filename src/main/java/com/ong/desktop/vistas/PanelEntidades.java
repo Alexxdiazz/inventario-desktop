@@ -9,6 +9,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import com.ong.desktop.servicios.Exportador;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.util.List;
 
 public class PanelEntidades {
 
@@ -51,6 +55,7 @@ public class PanelEntidades {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
+        Button btnExportar = new Button("Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
@@ -60,8 +65,9 @@ public class PanelEntidades {
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
+        btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
+        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -120,4 +126,41 @@ public class PanelEntidades {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
+        private void exportar() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Guardar reporte de entidades");
+        fc.setInitialFileName("entidades");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+        File archivo = fc.showSaveDialog(owner);
+        if (archivo == null) return;
+        try {
+            String[] encabezados = {"ID", "Tipo", "Nombre", "Documento", "Teléfono", "Email", "Dirección"};
+            List<String[]> filas = new java.util.ArrayList<>();
+            for (Entidad en : tabla.getItems()) {
+                filas.add(new String[]{
+                        String.valueOf(en.getIdEntidad()),
+                        en.getTipo() != null ? en.getTipo() : "",
+                        en.getNombreCompleto() != null ? en.getNombreCompleto() : "",
+                        en.getDocumentoIdentidad() != null ? en.getDocumentoIdentidad() : "",
+                        en.getTelefono() != null ? en.getTelefono() : "",
+                        en.getEmail() != null ? en.getEmail() : "",
+                        en.getDireccion() != null ? en.getDireccion() : ""
+                });
+            }
+            String ruta = archivo.getAbsolutePath();
+            if (ruta.toLowerCase().endsWith(".pdf")) {
+                Exportador.exportarPDF(ruta, "Reporte de Entidades", encabezados, filas);
+            } else {
+                if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
+                Exportador.exportarExcel(ruta, "Entidades", encabezados, filas);
+            }
+            mostrarAlerta("Reporte exportado:\n" + ruta);
+        } catch (Exception ex) {
+            mostrarAlerta("Error al exportar:\n" + ex.getMessage());
+        }
+    }
+    
 }

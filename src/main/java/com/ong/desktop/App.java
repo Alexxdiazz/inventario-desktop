@@ -22,7 +22,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Mostrar el login primero
+        // Mostrar el login primerod
         VentanaLogin.mostrar(stage, usuario -> {
             construirAppPrincipal(stage, usuario);
         });

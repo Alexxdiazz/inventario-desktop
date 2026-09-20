@@ -9,6 +9,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import com.ong.desktop.servicios.Exportador;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.util.List;
 
 public class PanelCategorias {
 
@@ -39,6 +43,7 @@ public class PanelCategorias {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
+        Button btnExportar = new Button("Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
@@ -48,8 +53,9 @@ public class PanelCategorias {
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
+        btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
+        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(10, barraBotones, tabla);
@@ -107,5 +113,37 @@ public class PanelCategorias {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
+    }
+        private void exportar() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Guardar reporte de categorías");
+        fc.setInitialFileName("categorias");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+        File archivo = fc.showSaveDialog(owner);
+        if (archivo == null) return;
+        try {
+            String[] encabezados = {"ID", "Nombre", "Descripción"};
+            List<String[]> filas = new java.util.ArrayList<>();
+            for (Categoria c : tabla.getItems()) {
+                filas.add(new String[]{
+                        String.valueOf(c.getIdCategoria()),
+                        c.getNombre() != null ? c.getNombre() : "",
+                        c.getDescripcion() != null ? c.getDescripcion() : ""
+                });
+            }
+            String ruta = archivo.getAbsolutePath();
+            if (ruta.toLowerCase().endsWith(".pdf")) {
+                Exportador.exportarPDF(ruta, "Reporte de Categorías", encabezados, filas);
+            } else {
+                if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
+                Exportador.exportarExcel(ruta, "Categorías", encabezados, filas);
+            }
+            mostrarAlerta("Reporte exportado:\n" + ruta);
+        } catch (Exception ex) {
+            mostrarAlerta("Error al exportar:\n" + ex.getMessage());
+        }
     }
 }

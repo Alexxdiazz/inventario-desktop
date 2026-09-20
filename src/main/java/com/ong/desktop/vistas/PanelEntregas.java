@@ -1,5 +1,8 @@
 package com.ong.desktop.vistas;
 
+import java.io.File;
+import java.util.List;
+
 import com.ong.desktop.modelos.EntregaDefinitiva;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
@@ -8,7 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import com.ong.desktop.servicios.Exportador;
+import javafx.stage.FileChooser;
+import java.io.File;
 
 public class PanelEntregas {
 
@@ -51,6 +58,7 @@ public class PanelEntregas {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
+        Button btnExportar = new Button("Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
@@ -60,6 +68,7 @@ public class PanelEntregas {
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
+        btnExportar.setOnAction(e -> exportar());
 
         HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
         barraBotones.setStyle("-fx-padding: 10px;");
@@ -120,4 +129,40 @@ public class PanelEntregas {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
+        private void exportar() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Guardar reporte de entregas");
+        fc.setInitialFileName("entregas");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+        File archivo = fc.showSaveDialog(owner);
+        if (archivo == null) return;
+        try {
+            String[] encabezados = {"ID", "Receptor", "Artículo", "Cantidad", "Responsable", "Motivo/Campaña"};
+            List<String[]> filas = new java.util.ArrayList<>();
+            for (EntregaDefinitiva en : tabla.getItems()) {
+                filas.add(new String[]{
+                        String.valueOf(en.getIdEntrega()),
+                        en.getReceptor() != null ? en.getReceptor().getNombreCompleto() : "",
+                        en.getArticulo() != null ? en.getArticulo().getNombre() : "",
+                        String.valueOf(en.getCantidad()),
+                        en.getResponsable() != null ? en.getResponsable().getNombre() : "",
+                        en.getMotivoCampana() != null ? en.getMotivoCampana() : ""
+                });
+            }
+            String ruta = archivo.getAbsolutePath();
+            if (ruta.toLowerCase().endsWith(".pdf")) {
+                Exportador.exportarPDF(ruta, "Reporte de Entregas", encabezados, filas);
+            } else {
+                if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
+                Exportador.exportarExcel(ruta, "Entregas", encabezados, filas);
+            }
+            mostrarAlerta("Reporte exportado:\n" + ruta);
+        } catch (Exception ex) {
+            mostrarAlerta("Error al exportar:\n" + ex.getMessage());
+        }
+    }
+    
 }
