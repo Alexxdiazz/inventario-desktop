@@ -11,6 +11,7 @@ com\ong\desktop\servicios\ApiServicio$7.class
 com\ong\desktop\vistas\FormularioUbicacion$AlGuardar.class
 com\ong\desktop\modelos\Ubicacion.class
 com\ong\desktop\vistas\FormularioEntidad.class
+com\ong\desktop\servicios\Exportador.class
 com\ong\desktop\vistas\VentanaLogin$AlIniciarSesion.class
 com\ong\desktop\vistas\PanelEntregas.class
 com\ong\desktop\modelos\Entidad.class

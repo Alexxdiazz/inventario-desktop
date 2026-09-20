@@ -9,7 +9,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import com.ong.desktop.servicios.Exportador;
+import javafx.stage.FileChooser;
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -121,6 +123,7 @@ public class PanelArticulos {
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
         Button btnRecargar = new Button("Recargar");
+        Button btnExportar = new Button("Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
@@ -130,8 +133,9 @@ public class PanelArticulos {
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
+        btnExportar.setOnAction(e -> exportar());
 
-        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar);
+        HBox barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         barraBotones.setStyle("-fx-padding: 10px;");
 
         VBox panel = new VBox(0, barraFiltros, barraBotones, tabla);
@@ -234,5 +238,53 @@ public class PanelArticulos {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
+    }
+        private void exportar() {
+        // Preguntar al usuario dónde guardar y qué formato
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar reporte de artículos");
+        fileChooser.setInitialFileName("articulos");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+
+        File archivo = fileChooser.showSaveDialog(owner);
+        if (archivo == null) return;
+
+        try {
+            // Preparar datos
+            String[] encabezados = {"ID", "Código", "Nombre", "Cantidad", "Estado", "Descripción", "Conservación"};
+            List<String[]> filas = new java.util.ArrayList<>();
+
+            for (Articulo a : tabla.getItems()) {
+                filas.add(new String[]{
+                        String.valueOf(a.getIdArticulo()),
+                        a.getCodigoInventario() != null ? a.getCodigoInventario() : "",
+                        a.getNombre() != null ? a.getNombre() : "",
+                        String.valueOf(a.getCantidad()),
+                        a.getEstadoActual() != null ? a.getEstadoActual() : "",
+                        a.getDescripcion() != null ? a.getDescripcion() : "",
+                        a.getEstadoConservacion() != null ? a.getEstadoConservacion() : ""
+                });
+            }
+
+            // Exportar según la extensión elegida
+            String ruta = archivo.getAbsolutePath();
+            if (ruta.toLowerCase().endsWith(".pdf")) {
+                Exportador.exportarPDF(ruta, "Reporte de Artículos", encabezados, filas);
+            } else {
+                // Asegurar extensión .xlsx
+                if (!ruta.toLowerCase().endsWith(".xlsx")) {
+                    ruta = ruta + ".xlsx";
+                }
+                Exportador.exportarExcel(ruta, "Artículos", encabezados, filas);
+            }
+
+            mostrarAlerta("Reporte exportado correctamente:\n" + ruta);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al exportar:\n" + ex.getMessage());
+        }
     }
 }
