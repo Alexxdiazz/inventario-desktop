@@ -1,7 +1,9 @@
+com\ong\desktop\vistas\VentanaRecuperar.class
 com\ong\desktop\vistas\PanelDashboard.class
 com\ong\desktop\vistas\PanelReservas.class
 com\ong\desktop\servicios\ApiServicio$4.class
 com\ong\desktop\vistas\FormularioEntrega$AlGuardar.class
+com\ong\desktop\vistas\VentanaRegistro.class
 com\ong\desktop\servicios\ApiServicio$8.class
 com\ong\desktop\vistas\PanelArticulos$1.class
 com\ong\desktop\vistas\FormularioEntrega.class
@@ -57,4 +59,5 @@ com\ong\desktop\vistas\FormularioDonacion.class
 com\ong\desktop\vistas\FormularioHistorial.class
 com\ong\desktop\servicios\ApiServicio$1.class
 com\ong\desktop\vistas\PanelCategorias.class
+com\ong\desktop\servicios\Preferencias.class
 com\ong\desktop\vistas\PanelReportes.class

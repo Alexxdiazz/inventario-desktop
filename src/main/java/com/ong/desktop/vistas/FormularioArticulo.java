@@ -30,6 +30,9 @@ public class FormularioArticulo {
         TextField txtDescripcion = new TextField();
         TextField txtCantidad = new TextField();
         TextField txtStockMinimo = new TextField();
+        TextField txtColor = new TextField();
+        TextField txtTamano = new TextField();
+        TextField txtProcedencia = new TextField();
         ComboBox<String> cmbEstado = new ComboBox<>();
         cmbEstado.getItems().addAll("DISPONIBLE", "RESERVADO", "PRESTADO", "EN_REPARACION", "ENTREGADO", "BAJA");
         ComboBox<String> cmbConservacion = new ComboBox<>();
@@ -45,12 +48,16 @@ public class FormularioArticulo {
         }
 
         if (articuloExistente != null) {
+            txtColor.setText(articuloExistente.getColor() != null ? articuloExistente.getColor() : "");
+            txtTamano.setText(articuloExistente.getTamano() != null ? articuloExistente.getTamano() : "");
+            txtProcedencia
+                    .setText(articuloExistente.getProcedencia() != null ? articuloExistente.getProcedencia() : "");
             txtCodigo.setText(articuloExistente.getCodigoInventario());
             txtNombre.setText(articuloExistente.getNombre());
             txtDescripcion.setText(articuloExistente.getDescripcion());
             txtCantidad.setText(String.valueOf(articuloExistente.getCantidad()));
-            txtStockMinimo.setText(String.valueOf(articuloExistente.getStockMinimo() != null ? articuloExistente.getStockMinimo() : 0));
-
+            txtStockMinimo.setText(String
+                    .valueOf(articuloExistente.getStockMinimo() != null ? articuloExistente.getStockMinimo() : 0));
 
             String estado = articuloExistente.getEstadoActual();
             cmbEstado.setValue(estado != null ? estado : "DISPONIBLE");
@@ -76,6 +83,12 @@ public class FormularioArticulo {
         grid.add(cmbConservacion, 1, 5);
         grid.add(new Label("Stock mínimo:"), 0, 6);
         grid.add(txtStockMinimo, 1, 6);
+        grid.add(new Label("Color:"), 0, 7);
+        grid.add(txtColor, 1, 7);
+        grid.add(new Label("Tamaño:"), 0, 8);
+        grid.add(txtTamano, 1, 8);
+        grid.add(new Label("Procedencia:"), 0, 9);
+        grid.add(txtProcedencia, 1, 9);
 
         Button btnGuardar = new Button("Guardar");
         Button btnCancelar = new Button("Cancelar");
@@ -90,14 +103,15 @@ public class FormularioArticulo {
                 a.setCantidad(Integer.parseInt(txtCantidad.getText()));
                 a.setEstadoActual(cmbEstado.getValue());
                 a.setEstadoConservacion(cmbConservacion.getValue());
+                a.setColor(txtColor.getText());
+                a.setTamano(txtTamano.getText());
+                a.setProcedencia(txtProcedencia.getText());
 
-                 if (!txtStockMinimo.getText().isEmpty()) {
-            a.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
-        } else {
-            a.setStockMinimo(0);
-        }
-
-
+                if (!txtStockMinimo.getText().isEmpty()) {
+                    a.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
+                } else {
+                    a.setStockMinimo(0);
+                }
 
                 if (articuloExistente != null) {
                     a.setIdArticulo(articuloExistente.getIdArticulo());
@@ -118,8 +132,8 @@ public class FormularioArticulo {
             }
         });
 
-        grid.add(btnGuardar, 0, 7);
-        grid.add(btnCancelar, 1, 7);
+        grid.add(btnGuardar, 0, 10);
+        grid.add(btnCancelar, 1, 10);
 
         Scene scene = new Scene(grid, 400, 350);
         ventana.setScene(scene);

@@ -620,4 +620,41 @@ public class ApiServicio {
             throw new RuntimeException("Error al borrar reserva. Código: " + response.statusCode());
         }
     }
+        // ============ REGISTRO ============
+
+    public Usuario registrar(Usuario nuevo) throws Exception {
+        String json = objectMapper.writeValueAsString(nuevo);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/auth/register"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200 && response.statusCode() != 201) {
+            throw new RuntimeException("Error al registrar: " + response.body());
+        }
+        return objectMapper.readValue(response.body(), Usuario.class);
+    }
+
+    // ============ RECUPERAR CONTRASEÑA ============
+
+    public Usuario buscarPorEmail(String email) throws Exception {
+        List<Usuario> usuarios = listarUsuarios();
+        return usuarios.stream()
+                .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void cambiarPassword(Integer idUsuario, String nuevaPassword) throws Exception {
+        Usuario u = new Usuario();
+        // Cargar todos los datos del usuario
+        List<Usuario> usuarios = listarUsuarios();
+        Usuario existente = usuarios.stream()
+                .filter(x -> x.getIdUsuario().equals(idUsuario))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        existente.setPasswordHash(nuevaPassword);
+        actualizarUsuario(idUsuario, existente);
+    }
 }

@@ -62,7 +62,24 @@ public class PanelArticulos {
         colConservacion.setCellValueFactory(new PropertyValueFactory<>("estadoConservacion"));
         colConservacion.setPrefWidth(110);
 
-        tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion);
+        TableColumn<Articulo, String> colColor = new TableColumn<>("Color");
+        colColor.setCellValueFactory(new PropertyValueFactory<>("color"));
+        colColor.setPrefWidth(90);
+
+        TableColumn<Articulo, String> colTamano = new TableColumn<>("Tamaño");
+        colTamano.setCellValueFactory(new PropertyValueFactory<>("tamano"));
+        colTamano.setPrefWidth(80);
+
+        TableColumn<Articulo, String> colProcedencia = new TableColumn<>("Procedencia");
+        colProcedencia.setCellValueFactory(new PropertyValueFactory<>("procedencia"));
+        colProcedencia.setPrefWidth(120);
+
+        TableColumn<Articulo, Integer> colStockMin = new TableColumn<>("Stock mín.");
+        colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
+        colStockMin.setPrefWidth(80);
+
+        tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion, colColor, colTamano, 
+                          colProcedencia, colStockMin);
 
         tabla.setRowFactory(tv -> new TableRow<Articulo>() {
             @Override

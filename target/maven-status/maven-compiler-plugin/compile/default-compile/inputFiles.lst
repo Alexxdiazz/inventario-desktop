@@ -11,6 +11,7 @@ C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\mod
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\modelos\Usuario.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\servicios\ApiServicio.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\servicios\Exportador.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\servicios\Preferencias.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioArticulo.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioCategoria.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\FormularioDevolucion.java
@@ -35,3 +36,5 @@ C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vis
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelUbicaciones.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\PanelUsuarios.java
 C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\VentanaLogin.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\VentanaRecuperar.java
+C:\Users\58769084\Documents\inventario-desktop\src\main\java\com\ong\desktop\vistas\VentanaRegistro.java
