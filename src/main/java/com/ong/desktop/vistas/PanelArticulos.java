@@ -27,6 +27,7 @@ public class PanelArticulos {
     private final ComboBox<String> cmbEstado = new ComboBox<>();
     private final ComboBox<String> cmbCategoria = new ComboBox<>();
     private final String rol;
+    private Integer categoriaInicial = null;
 
     public PanelArticulos(Stage owner, String rol) {
         this.owner = owner;
@@ -78,8 +79,9 @@ public class PanelArticulos {
         colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
         colStockMin.setPrefWidth(80);
 
-        tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion, colColor, colTamano, 
-                          colProcedencia, colStockMin);
+        tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion,
+                colColor, colTamano,
+                colProcedencia, colStockMin);
 
         tabla.setRowFactory(tv -> new TableRow<Articulo>() {
             @Override
@@ -111,6 +113,15 @@ public class PanelArticulos {
                     .forEach(c -> cmbCategoria.getItems().add(c.getIdCategoria() + " - " + c.getNombre()));
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        // Si se pasó una categoría inicial, preseleccionarla
+        if (categoriaInicial != null) {
+            for (String item : cmbCategoria.getItems()) {
+                if (item.startsWith(categoriaInicial + " - ")) {
+                    cmbCategoria.setValue(item);
+                    break;
+                }
+            }
         }
         cmbCategoria.setPrefWidth(180);
 
@@ -314,5 +325,9 @@ public class PanelArticulos {
             ex.printStackTrace();
             mostrarAlerta("Error al exportar:\n" + ex.getMessage());
         }
+    }
+
+    public void setCategoriaInicial(Integer idCategoria) {
+        this.categoriaInicial = idCategoria;
     }
 }

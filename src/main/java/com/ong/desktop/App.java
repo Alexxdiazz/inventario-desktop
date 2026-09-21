@@ -1,5 +1,4 @@
 package com.ong.desktop;
-
 import com.ong.desktop.modelos.Usuario;
 import com.ong.desktop.vistas.*;
 import javafx.application.Application;
@@ -13,6 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.util.function.Consumer;
 
 public class App extends Application {
 
@@ -73,7 +73,13 @@ public class App extends Application {
         String rol = usuario.getRol() != null ? usuario.getRol() : "CONSULTA";
 
         Button btnDashboard = crearBotonMenu("Dashboard");
-        btnDashboard.setOnAction(e -> mostrarPanel(btnDashboard, new PanelDashboard().construir()));
+        btnDashboard.setOnAction(e -> mostrarPanel(btnDashboard, 
+        new PanelDashboard(stage, usuario, idCategoria -> {
+            // Al hacer clic en una categoría, mostrar PanelArticulos filtrado
+            PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
+            pa.setCategoriaInicial(idCategoria);
+            mostrarPanel(btnDashboard, pa.construir());
+        }).construir()));
         menuLateral.getChildren().add(btnDashboard);
 
         agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
@@ -101,8 +107,12 @@ public class App extends Application {
 
         root.setLeft(menuLateral);
 
-        mostrarPanel(btnDashboard, new PanelDashboard().construir());
-        mostrarPanel(btnDashboard, new PanelDashboard().construir());
+        mostrarPanel(btnDashboard, 
+        new PanelDashboard(stage, usuario, idCategoria -> {
+            PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
+            pa.setCategoriaInicial(idCategoria);
+            mostrarPanel(btnDashboard, pa.construir());
+        }).construir());
 
         Scene scene = new Scene(root, 1200, 700);
         stage.setTitle("Inventario - ONG");

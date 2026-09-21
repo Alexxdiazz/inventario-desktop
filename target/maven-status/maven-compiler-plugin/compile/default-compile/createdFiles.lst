@@ -9,6 +9,7 @@ com\ong\desktop\vistas\PanelArticulos$1.class
 com\ong\desktop\vistas\FormularioEntrega.class
 com\ong\desktop\modelos\HistorialMovimiento.class
 com\ong\desktop\vistas\FormularioEntidad$AlGuardar.class
+com\ong\desktop\servicios\Notificaciones.class
 com\ong\desktop\modelos\Categoria.class
 com\ong\desktop\servicios\ApiServicio$7.class
 com\ong\desktop\vistas\FormularioUbicacion$AlGuardar.class
@@ -41,6 +42,7 @@ com\ong\desktop\vistas\FormularioPrestamo$AlGuardar.class
 com\ong\desktop\vistas\FormularioPrestamo.class
 com\ong\desktop\vistas\FormularioCategoria$AlGuardar.class
 com\ong\desktop\App.class
+com\ong\desktop\servicios\Notificaciones$Alerta.class
 com\ong\desktop\servicios\ApiServicio$2.class
 com\ong\desktop\vistas\FormularioReserva$AlGuardar.class
 com\ong\desktop\vistas\FormularioUbicacion.class
