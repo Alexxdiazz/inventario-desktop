@@ -1,4 +1,5 @@
 package com.ong.desktop;
+
 import com.ong.desktop.modelos.Usuario;
 import com.ong.desktop.vistas.*;
 import javafx.application.Application;
@@ -57,11 +58,10 @@ public class App extends Application {
         });
 
         HBox barraSuperior = new HBox(15, titulo, btnCerrarSesion);
-        barraSuperior.setStyle("-fx-background-color: #d63384; -fx-padding: 15px; -fx-alignment: center-left;");
+        barraSuperior.getStyleClass().add("barra-superior");
         barraSuperior.setAlignment(Pos.CENTER_LEFT);
 
         root.setTop(barraSuperior);
-        // ===== Menú lateral =====
         menuLateral = new VBox(5);
         menuLateral.setStyle(
                 "-fx-background-color: #f8f9fa; -fx-padding: 15px; -fx-min-width: 200px; -fx-border-color: #dee2e6; -fx-border-width: 0 1px 0 0;");
@@ -73,13 +73,13 @@ public class App extends Application {
         String rol = usuario.getRol() != null ? usuario.getRol() : "CONSULTA";
 
         Button btnDashboard = crearBotonMenu("Dashboard");
-        btnDashboard.setOnAction(e -> mostrarPanel(btnDashboard, 
-        new PanelDashboard(stage, usuario, idCategoria -> {
-            // Al hacer clic en una categoría, mostrar PanelArticulos filtrado
-            PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
-            pa.setCategoriaInicial(idCategoria);
-            mostrarPanel(btnDashboard, pa.construir());
-        }).construir()));
+        btnDashboard.setOnAction(e -> mostrarPanel(btnDashboard,
+                new PanelDashboard(stage, usuario, idCategoria -> {
+                    // Al hacer clic en una categoría, mostrar PanelArticulos filtrado
+                    PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
+                    pa.setCategoriaInicial(idCategoria);
+                    mostrarPanel(btnDashboard, pa.construir());
+                }).construir()));
         menuLateral.getChildren().add(btnDashboard);
 
         agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
@@ -102,19 +102,20 @@ public class App extends Application {
                 "Historial", stage, "historial");
         agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
                 "Reservas", stage, "reservas");
-        agregarBotonSi(rol, new String[]{"ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA"}, 
+        agregarBotonSi(rol, new String[] { "ADMINISTRADOR", "RESPONSABLE_INVENTARIO", "USUARIO_OPERATIVO", "CONSULTA" },
                 "Reportes", stage, "reportes");
 
         root.setLeft(menuLateral);
 
-        mostrarPanel(btnDashboard, 
-        new PanelDashboard(stage, usuario, idCategoria -> {
-            PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
-            pa.setCategoriaInicial(idCategoria);
-            mostrarPanel(btnDashboard, pa.construir());
-        }).construir());
+        mostrarPanel(btnDashboard,
+                new PanelDashboard(stage, usuario, idCategoria -> {
+                    PanelArticulos pa = new PanelArticulos(stage, usuario.getRol());
+                    pa.setCategoriaInicial(idCategoria);
+                    mostrarPanel(btnDashboard, pa.construir());
+                }).construir());
 
         Scene scene = new Scene(root, 1200, 700);
+        scene.getStylesheets().add(getClass().getResource("/estilos.css").toExternalForm());
         stage.setTitle("Inventario - ONG");
         stage.setScene(scene);
         stage.show();
@@ -124,31 +125,22 @@ public class App extends Application {
         Button btn = new Button(texto);
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setAlignment(Pos.CENTER_LEFT);
-        btn.setStyle(
-                "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
-        btn.setOnMouseEntered(e -> {
-            if (btn != botonActivo) {
-                btn.setStyle(
-                        "-fx-background-color: #e9ecef; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
-            }
-        });
-        btn.setOnMouseExited(e -> {
-            if (btn != botonActivo) {
-                btn.setStyle(
-                        "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
-            }
-        });
+        btn.getStyleClass().add("boton-menu");
         return btn;
     }
 
     private void mostrarPanel(Button boton, VBox panel) {
         if (botonActivo != null) {
-            botonActivo.setStyle(
-                    "-fx-background-color: transparent; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+            botonActivo.getStyleClass().remove("boton-menu-activo");
+            if (!botonActivo.getStyleClass().contains("boton-menu")) {
+                botonActivo.getStyleClass().add("boton-menu");
+            }
         }
         botonActivo = boton;
-        boton.setStyle(
-                "-fx-background-color: #d63384; -fx-text-fill: white; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-cursor: hand;");
+        boton.getStyleClass().remove("boton-menu");
+        if (!boton.getStyleClass().contains("boton-menu-activo")) {
+            boton.getStyleClass().add("boton-menu-activo");
+        }
         root.setCenter(panel);
     }
 
@@ -191,7 +183,8 @@ public class App extends Application {
                 return new PanelHistorial(stage, rol).construir();
             case "reservas":
                 return new PanelReservas(stage, rol).construir();
-            case "reportes":    return new PanelReportes(stage).construir();
+            case "reportes":
+                return new PanelReportes(stage).construir();
             default:
                 throw new IllegalArgumentException("Tipo desconocido: " + tipo);
         }

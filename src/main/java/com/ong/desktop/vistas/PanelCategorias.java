@@ -2,16 +2,18 @@ package com.ong.desktop.vistas;
 
 import com.ong.desktop.modelos.Categoria;
 import com.ong.desktop.servicios.ApiServicio;
+import com.ong.desktop.servicios.Exportador;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import com.ong.desktop.servicios.Exportador;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PanelCategorias {
@@ -19,39 +21,43 @@ public class PanelCategorias {
     private final ApiServicio api = new ApiServicio();
     private final TableView<Categoria> tabla = new TableView<>();
     private final Stage owner;
-     private final String rol;
-    
+    private final String rol;
+    private final Label lblContador = new Label();
 
     public PanelCategorias(Stage owner, String rol) {
         this.owner = owner;
-         this.rol = rol; 
+        this.rol = rol;
     }
 
     public VBox construir() {
-        TableColumn<Categoria, Integer> colId = new TableColumn<>("ID");
-        colId.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
-        colId.setPrefWidth(60);
+        VBox panel = new VBox(15);
+        panel.setPadding(new Insets(20));
+        panel.setStyle("-fx-background-color: #fdf6fa;");
 
-        TableColumn<Categoria, String> colNombre = new TableColumn<>("Nombre");
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colNombre.setPrefWidth(200);
+        HBox breadcrumb = new HBox(10);
+        breadcrumb.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        TableColumn<Categoria, String> colDescripcion = new TableColumn<>("Descripcion");
-        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
-        colDescripcion.setPrefWidth(300);
+        Label lblRuta = new Label("🏠 / Categorías");
+        lblRuta.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #d63384;");
 
-        tabla.getColumns().addAll(colId, colNombre, colDescripcion);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button btnNuevo = new Button("Nuevo");
-        Button btnEditar = new Button("Editar");
-        Button btnEliminar = new Button("Eliminar");
-        Button btnRecargar = new Button("Recargar");
-        Button btnExportar = new Button("Exportar");
+        lblContador.setStyle("-fx-font-size: 12px; -fx-text-fill: #6c757d;");
+
+        breadcrumb.getChildren().addAll(lblRuta, spacer, lblContador);
+
+        // ===== Botones =====
+        Button btnNuevo = new Button("➕ Nuevo");
+        Button btnEditar = new Button("✏ Editar");
+        Button btnEliminar = new Button("🗑 Eliminar");
+        Button btnRecargar = new Button("🔄 Recargar");
+        Button btnExportar = new Button("📊 Exportar");
 
         btnNuevo.setOnAction(e -> abrirFormulario(null));
         btnEditar.setOnAction(e -> {
             Categoria sel = tabla.getSelectionModel().getSelectedItem();
-            if (sel == null) { mostrarAlerta("Selecciona una categoria primero"); return; }
+            if (sel == null) { mostrarAlerta("Seleccioná una categoría primero"); return; }
             abrirFormulario(sel);
         });
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
@@ -60,14 +66,29 @@ public class PanelCategorias {
 
         HBox barraBotones;
         if ("CONSULTA".equals(rol)) {
-            barraBotones = new HBox(10, btnRecargar, btnExportar);
+            barraBotones = new HBox(8, btnRecargar, btnExportar);
         } else {
-            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+            barraBotones = new HBox(8, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         }
-        barraBotones.setStyle("-fx-padding: 10px;");
+        barraBotones.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        VBox panel = new VBox(10, barraBotones, tabla);
-        panel.setStyle("-fx-padding: 15px;");
+        // ===== Tabla =====
+        TableColumn<Categoria, Integer> colId = new TableColumn<>("ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
+        colId.setPrefWidth(60);
+
+        TableColumn<Categoria, String> colNombre = new TableColumn<>("Nombre");
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colNombre.setPrefWidth(250);
+
+        TableColumn<Categoria, String> colDescripcion = new TableColumn<>("Descripción");
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+        colDescripcion.setPrefWidth(400);
+
+        tabla.getColumns().addAll(colId, colNombre, colDescripcion);
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+
+        panel.getChildren().addAll(breadcrumb, barraBotones, tabla);
 
         cargar();
         return panel;
@@ -75,8 +96,9 @@ public class PanelCategorias {
 
     private void cargar() {
         try {
-            ObservableList<Categoria> datos = FXCollections.observableArrayList(api.listarCategorias());
-            tabla.setItems(datos);
+            List<Categoria> lista = api.listarCategorias();
+            tabla.setItems(FXCollections.observableArrayList(lista));
+            lblContador.setText("Mostrando " + lista.size() + " categorías");
         } catch (Exception e) {
             e.printStackTrace();
             mostrarAlerta("No se pudo conectar con la API:\n" + e.getMessage());
@@ -101,9 +123,9 @@ public class PanelCategorias {
 
     private void eliminarSeleccionado() {
         Categoria sel = tabla.getSelectionModel().getSelectedItem();
-        if (sel == null) { mostrarAlerta("Selecciona una categoria primero"); return; }
+        if (sel == null) { mostrarAlerta("Seleccioná una categoría primero"); return; }
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setHeaderText("Eliminar esta categoria?");
+        confirmacion.setHeaderText("¿Eliminar esta categoría?");
         confirmacion.setContentText(sel.getNombre());
         confirmacion.showAndWait().ifPresent(respuesta -> {
             if (respuesta == ButtonType.OK) {
@@ -117,14 +139,9 @@ public class PanelCategorias {
         });
     }
 
-    private void mostrarAlerta(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
-    }
-        private void exportar() {
+    private void exportar() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Guardar reporte de categorÃ­as");
+        fc.setTitle("Guardar reporte de categorías");
         fc.setInitialFileName("categorias");
         fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"),
@@ -133,8 +150,8 @@ public class PanelCategorias {
         File archivo = fc.showSaveDialog(owner);
         if (archivo == null) return;
         try {
-            String[] encabezados = {"ID", "Nombre", "DescripciÃ³n"};
-            List<String[]> filas = new java.util.ArrayList<>();
+            String[] encabezados = {"ID", "Nombre", "Descripción"};
+            List<String[]> filas = new ArrayList<>();
             for (Categoria c : tabla.getItems()) {
                 filas.add(new String[]{
                         String.valueOf(c.getIdCategoria()),
@@ -144,14 +161,20 @@ public class PanelCategorias {
             }
             String ruta = archivo.getAbsolutePath();
             if (ruta.toLowerCase().endsWith(".pdf")) {
-                Exportador.exportarPDF(ruta, "Reporte de CategorÃ­as", encabezados, filas);
+                Exportador.exportarPDF(ruta, "Reporte de Categorías", encabezados, filas);
             } else {
                 if (!ruta.toLowerCase().endsWith(".xlsx")) ruta += ".xlsx";
-                Exportador.exportarExcel(ruta, "CategorÃ­as", encabezados, filas);
+                Exportador.exportarExcel(ruta, "Categorías", encabezados, filas);
             }
             mostrarAlerta("Reporte exportado:\n" + ruta);
         } catch (Exception ex) {
             mostrarAlerta("Error al exportar:\n" + ex.getMessage());
         }
+    }
+
+    private void mostrarAlerta(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }

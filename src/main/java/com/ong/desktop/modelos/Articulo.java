@@ -15,9 +15,13 @@ public class Articulo {
     private Integer idCategoria;
     private Integer idUbicacion;
     private Integer stockMinimo;
-     private String color;
+    private String color;
     private String tamano;
     private String procedencia;
+    private String rutaFoto;
+    private String marcaModelo;
+    private String numeroSerie;
+    private String observaciones;
 
     public Integer getIdArticulo() {
         return idArticulo;
@@ -103,13 +107,61 @@ public class Articulo {
     public String toString() {
         return nombre;
     }
-        public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
 
-    public String getTamano() { return tamano; }
-    public void setTamano(String tamano) { this.tamano = tamano; }
+    public String getColor() {
+        return color;
+    }
 
-    public String getProcedencia() { return procedencia; }
-    public void setProcedencia(String procedencia) { this.procedencia = procedencia; }
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getTamano() {
+        return tamano;
+    }
+
+    public void setTamano(String tamano) {
+        this.tamano = tamano;
+    }
+
+    public String getProcedencia() {
+        return procedencia;
+    }
+
+    public void setProcedencia(String procedencia) {
+        this.procedencia = procedencia;
+    }
+
+    public String getRutaFoto() {
+        return rutaFoto;
+    }
+
+    public void setRutaFoto(String rutaFoto) {
+        this.rutaFoto = rutaFoto;
+    }
+
+    public String getMarcaModelo() {
+        return marcaModelo;
+    }
+
+    public void setMarcaModelo(String marcaModelo) {
+        this.marcaModelo = marcaModelo;
+    }
+
+    public String getNumeroSerie() {
+        return numeroSerie;
+    }
+
+    public void setNumeroSerie(String numeroSerie) {
+        this.numeroSerie = numeroSerie;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
 
 }

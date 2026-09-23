@@ -4,8 +4,10 @@ import com.ong.desktop.modelos.Articulo;
 import com.ong.desktop.servicios.ApiServicio;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -14,6 +16,9 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.io.File;
 
 public class PanelArticulos {
 
@@ -28,6 +33,7 @@ public class PanelArticulos {
     private final ComboBox<String> cmbCategoria = new ComboBox<>();
     private final String rol;
     private Integer categoriaInicial = null;
+    private Runnable alVolverDelDetalle;
 
     public PanelArticulos(Stage owner, String rol) {
         this.owner = owner;
@@ -79,26 +85,64 @@ public class PanelArticulos {
         colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
         colStockMin.setPrefWidth(80);
 
-        tabla.getColumns().addAll(colId, colCodigo, colNombre, colCantidad, colEstado, colDescripcion, colConservacion,
-                colColor, colTamano,
-                colProcedencia, colStockMin);
+        TableColumn<Articulo, String> colFoto = new TableColumn<>("Foto");
+        colFoto.setPrefWidth(60);
+        colFoto.setCellValueFactory(new PropertyValueFactory<>("rutaFoto"));
+        colFoto.setCellFactory(col -> new TableCell<Articulo, String>() {
+            private final ImageView iv = new ImageView();
+            {
+                iv.setFitWidth(40);
+                iv.setFitHeight(40);
+                iv.setPreserveRatio(true);
+            }
 
-        tabla.setRowFactory(tv -> new TableRow<Articulo>() {
             @Override
-            protected void updateItem(Articulo item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setStyle("");
-                } else if (item.getStockMinimo() != null
-                        && item.getCantidad() != null
-                        && item.getCantidad() <= item.getStockMinimo()) {
-                    setStyle("-fx-background-color: #ffcccc;");
+            protected void updateItem(String ruta, boolean empty) {
+                super.updateItem(ruta, empty);
+                if (empty || ruta == null || ruta.isEmpty()) {
+                    setGraphic(null);
                 } else {
-                    setStyle("");
+                    try {
+                        File f = new File(ruta);
+                        if (f.exists()) {
+                            iv.setImage(new Image(f.toURI().toString()));
+                            setGraphic(iv);
+                        } else {
+                            setGraphic(null);
+                        }
+                    } catch (Exception ex) {
+                        setGraphic(null);
+                    }
                 }
             }
         });
 
+        tabla.getColumns().addAll(colId, colFoto, colCodigo, colNombre, colCantidad, colEstado, colDescripcion,
+                colConservacion, colColor, colTamano,
+                colProcedencia, colStockMin);
+        tabla.setRowFactory(tv -> {
+            TableRow<Articulo> row = new TableRow<Articulo>() {
+                @Override
+                protected void updateItem(Articulo item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (item == null || empty) {
+                        setStyle("");
+                    } else if (item.getStockMinimo() != null
+                            && item.getCantidad() != null
+                            && item.getCantidad() <= item.getStockMinimo()) {
+                        setStyle("-fx-background-color: #ffcccc;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            };
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    abrirDetalle(row.getItem());
+                }
+            });
+            return row;
+        });
         txtBuscar.setPromptText("🔍 Buscar por nombre, código o descripción...");
         txtBuscar.setPrefWidth(280);
 
@@ -144,6 +188,7 @@ public class PanelArticulos {
         barraFiltros.setStyle(
                 "-fx-padding: 10px; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1px 0;");
 
+        Button btnVer = new Button(" Ver Detalle");
         Button btnNuevo = new Button("Nuevo");
         Button btnEditar = new Button("Editar");
         Button btnEliminar = new Button("Eliminar");
@@ -162,12 +207,20 @@ public class PanelArticulos {
         btnEliminar.setOnAction(e -> eliminarSeleccionado());
         btnRecargar.setOnAction(e -> cargar());
         btnExportar.setOnAction(e -> exportar());
+        btnVer.setOnAction(e -> {
+            Articulo sel = tabla.getSelectionModel().getSelectedItem();
+            if (sel == null) {
+                mostrarAlerta("Seleccioná un artículo primero");
+                return;
+            }
+            abrirDetalle(sel);
+        });
 
         HBox barraBotones;
         if (puedeEditar) {
-            barraBotones = new HBox(10, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
+            barraBotones = new HBox(10, btnVer, btnNuevo, btnEditar, btnEliminar, btnRecargar, btnExportar);
         } else {
-            barraBotones = new HBox(10, btnRecargar, btnExportar);
+            barraBotones = new HBox(10, btnVer, btnRecargar, btnExportar);
         }
         barraBotones.setStyle("-fx-padding: 10px;");
 
@@ -195,13 +248,11 @@ public class PanelArticulos {
         String estado = cmbEstado.getValue();
         String categoria = cmbCategoria.getValue();
 
-        // Extraer el ID de la categoría seleccionada
         Integer idCategoriaFiltro = null;
         if (categoria != null && !categoria.isEmpty()) {
             try {
                 idCategoriaFiltro = Integer.parseInt(categoria.split(" - ")[0]);
             } catch (NumberFormatException ex) {
-                // ignorar
             }
         }
 
@@ -209,7 +260,6 @@ public class PanelArticulos {
 
         List<Articulo> filtrados = todosLosArticulos.stream()
                 .filter(a -> {
-                    // Filtro de texto
                     if (!texto.isEmpty()) {
                         String nombre = a.getNombre() != null ? a.getNombre().toLowerCase() : "";
                         String codigo = a.getCodigoInventario() != null ? a.getCodigoInventario().toLowerCase() : "";
@@ -218,12 +268,10 @@ public class PanelArticulos {
                             return false;
                         }
                     }
-                    // Filtro de estado
                     if (estado != null && !estado.isEmpty()) {
                         if (!estado.equals(a.getEstadoActual()))
                             return false;
                     }
-                    // Filtro de categoría
                     if (idCat != null) {
                         if (a.getIdCategoria() == null || !a.getIdCategoria().equals(idCat))
                             return false;
@@ -308,12 +356,10 @@ public class PanelArticulos {
                 });
             }
 
-            // Exportar según la extensión elegida
             String ruta = archivo.getAbsolutePath();
             if (ruta.toLowerCase().endsWith(".pdf")) {
                 Exportador.exportarPDF(ruta, "Reporte de Artículos", encabezados, filas);
             } else {
-                // Asegurar extensión .xlsx
                 if (!ruta.toLowerCase().endsWith(".xlsx")) {
                     ruta = ruta + ".xlsx";
                 }
@@ -330,4 +376,19 @@ public class PanelArticulos {
     public void setCategoriaInicial(Integer idCategoria) {
         this.categoriaInicial = idCategoria;
     }
+
+    private void abrirDetalle(Articulo articulo) {
+        Stage ventanaDetalle = new Stage();
+        ventanaDetalle.setTitle("Detalle del Artículo");
+
+        PanelDetalleArticulo detalle = new PanelDetalleArticulo(
+                owner, articulo, rol,
+                () -> ventanaDetalle.close() // Al volver, cerrar la ventana
+        );
+
+        Scene scene = new Scene(detalle.construir(), 900, 700);
+        ventanaDetalle.setScene(scene);
+        ventanaDetalle.show();
+    }
+
 }

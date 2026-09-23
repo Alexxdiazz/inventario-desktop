@@ -5,8 +5,13 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+import java.io.File;
 
 public class FormularioArticulo {
 
@@ -33,6 +38,13 @@ public class FormularioArticulo {
         TextField txtColor = new TextField();
         TextField txtTamano = new TextField();
         TextField txtProcedencia = new TextField();
+        TextField txtRutaFoto = new TextField();
+        txtRutaFoto.setEditable(false);
+        txtRutaFoto.setPromptText("Sin foto seleccionada");
+        ImageView vistaPrevia = new ImageView();
+        vistaPrevia.setFitHeight(80);
+        vistaPrevia.setFitWidth(80);
+        vistaPrevia.setPreserveRatio(true);
         ComboBox<String> cmbEstado = new ComboBox<>();
         cmbEstado.getItems().addAll("DISPONIBLE", "RESERVADO", "PRESTADO", "EN_REPARACION", "ENTREGADO", "BAJA");
         ComboBox<String> cmbConservacion = new ComboBox<>();
@@ -64,6 +76,19 @@ public class FormularioArticulo {
 
             String conservacion = articuloExistente.getEstadoConservacion();
             cmbConservacion.setValue(conservacion != null ? conservacion : "BUENO");
+
+            // ===== NUEVO: precarga de la foto =====
+            if (articuloExistente.getRutaFoto() != null && !articuloExistente.getRutaFoto().isEmpty()) {
+                txtRutaFoto.setText(articuloExistente.getRutaFoto());
+                try {
+                    File f = new File(articuloExistente.getRutaFoto());
+                    if (f.exists()) {
+                        vistaPrevia.setImage(new Image(f.toURI().toString()));
+                    }
+                } catch (Exception ex) {
+                    System.out.println("No se pudo cargar la imagen: " + ex.getMessage());
+                }
+            }
         } else {
             cmbEstado.setValue("DISPONIBLE");
             cmbConservacion.setValue("BUENO");
@@ -92,8 +117,24 @@ public class FormularioArticulo {
 
         Button btnGuardar = new Button("Guardar");
         Button btnCancelar = new Button("Cancelar");
+        Button btnSubirFoto = new Button("📷 Subir Foto");
+        btnSubirFoto.setOnAction(e -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Seleccionar foto del artículo");
+            fc.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg", "*.gif"));
+            File archivo = fc.showOpenDialog(null);
+            if (archivo != null) {
+                txtRutaFoto.setText(archivo.getAbsolutePath());
+                try {
+                    Image img = new Image(archivo.toURI().toString());
+                    vistaPrevia.setImage(img);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
         btnCancelar.setOnAction(e -> ventana.close());
-
         btnGuardar.setOnAction(e -> {
             try {
                 Articulo a = new Articulo();
@@ -105,6 +146,7 @@ public class FormularioArticulo {
                 a.setEstadoConservacion(cmbConservacion.getValue());
                 a.setColor(txtColor.getText());
                 a.setTamano(txtTamano.getText());
+                a.setRutaFoto(txtRutaFoto.getText());
                 a.setProcedencia(txtProcedencia.getText());
 
                 if (!txtStockMinimo.getText().isEmpty()) {
@@ -132,8 +174,12 @@ public class FormularioArticulo {
             }
         });
 
-        grid.add(btnGuardar, 0, 10);
-        grid.add(btnCancelar, 1, 10);
+        grid.add(btnGuardar, 0, 11);
+        grid.add(btnCancelar, 1, 11);
+        grid.add(new Label("Foto:"), 0, 10);
+        HBox fotoBox = new HBox(10, txtRutaFoto, btnSubirFoto, vistaPrevia);
+        fotoBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        grid.add(fotoBox, 1, 10);
 
         Scene scene = new Scene(grid, 400, 350);
         ventana.setScene(scene);

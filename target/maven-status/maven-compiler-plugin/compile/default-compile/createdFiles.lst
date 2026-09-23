@@ -14,6 +14,7 @@ com\ong\desktop\modelos\Categoria.class
 com\ong\desktop\servicios\ApiServicio$7.class
 com\ong\desktop\vistas\FormularioUbicacion$AlGuardar.class
 com\ong\desktop\modelos\Ubicacion.class
+com\ong\desktop\vistas\PanelDetalleArticulo.class
 com\ong\desktop\vistas\FormularioEntidad.class
 com\ong\desktop\servicios\Exportador.class
 com\ong\desktop\vistas\VentanaLogin$AlIniciarSesion.class
@@ -40,6 +41,7 @@ com\ong\desktop\modelos\Prestamo.class
 com\ong\desktop\vistas\PanelHistorial.class
 com\ong\desktop\vistas\FormularioPrestamo$AlGuardar.class
 com\ong\desktop\vistas\FormularioPrestamo.class
+com\ong\desktop\vistas\PanelArticulos$2.class
 com\ong\desktop\vistas\FormularioCategoria$AlGuardar.class
 com\ong\desktop\App.class
 com\ong\desktop\servicios\Notificaciones$Alerta.class
@@ -56,6 +58,7 @@ com\ong\desktop\vistas\FormularioHistorial$AlGuardar.class
 com\ong\desktop\servicios\ApiServicio$5.class
 com\ong\desktop\vistas\PanelArticulos.class
 com\ong\desktop\modelos\EntregaDefinitiva.class
+com\ong\desktop\vistas\PanelDetalleArticulo$AlVolver.class
 com\ong\desktop\vistas\PanelDonaciones.class
 com\ong\desktop\vistas\FormularioDonacion.class
 com\ong\desktop\vistas\FormularioHistorial.class
